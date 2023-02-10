@@ -1,14 +1,49 @@
+import 'package:flutter_home_connect_sdk/src/client_dart.dart';
+import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
+import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
+import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
+
+enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishWasher }
+
+Map<String, DeviceType> deviceTypeMap = {
+  "Oven": DeviceType.oven,
+  "coffee maker": DeviceType.coffeeMaker,
+  "dryer": DeviceType.dryer,
+  "washer": DeviceType.washer,
+  "fridge freezer": DeviceType.fridgeFreezer,
+  "dish washer": DeviceType.dishWasher
+};
+
 abstract class HomeDevice {
-  final String name;
-  final String brand;
-  final String vib;
-  final bool connected;
-  final String type;
-  final String enumber;
-  final String haId;
+  final HomeConnectApi api;
+  final DeviceInfo info;
+  final List<DeviceOptions> options;
+  final List<DeviceStatus> status;
 
-  HomeDevice(this.name, this.brand, this.vib, this.connected, this.type,
-      this.enumber, this.haId);
+  set info(DeviceInfo info) {
+    this.info = info;
+  }
 
-  // void doProgram(Program pr);
+  set options(List<DeviceOptions> options) {
+    this.options = options;
+  }
+
+  set status(List<DeviceStatus> status) {
+    this.status = status;
+  }
+
+  String get deviceName => info.name;
+  String get deviceHaId => info.haId;
+
+  HomeDevice(this.api, this.info, this.options, this.status);
+
+  void turnOn();
+
+  void turnOff();
+
+  void listen() {
+    while (true) {
+      print('listening');
+    }
+  }
 }
