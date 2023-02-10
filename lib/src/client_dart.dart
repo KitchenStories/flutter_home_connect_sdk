@@ -73,7 +73,7 @@ class HomeConnectApi {
     if (uri == null) {
       throw Exception('Invalid URI: $path');
     }
-    final response = await http.get(
+    final response = await client.get(
       uri,
       headers: commonHeaders,
     );
@@ -90,7 +90,6 @@ class HomeConnectApi {
   Future<void> putPowerState(
       String haId, String settingKey, Map<String, dynamic> payload) async {
     final path = "$baseUrl/$haId/settings/$settingKey";
-    print(path);
     final uri = Uri.tryParse(path);
     if (uri == null) {
       throw Exception('Invalid URI: $path');
