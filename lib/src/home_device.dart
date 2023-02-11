@@ -1,3 +1,4 @@
+import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
@@ -36,6 +37,12 @@ abstract class HomeDevice {
   String get deviceHaId => info.haId;
 
   HomeDevice(this.api, this.info, this.options, this.status);
+
+  Map<String, dynamic> showOptions();
+
+  Map<String, dynamic> getStatus();
+
+  void updateStatusFromEvent(Event event);
 
   void turnOn();
 

@@ -100,13 +100,11 @@ void main() {
       expect(response.body, '');
     });
 
-    // test api.get function check if resource is valid
     test('get existing device', () async {
       final response = await api.get(device.deviceHaId);
       expect(response.body, '{"data": "oven-info"}');
     });
 
-    // get non existing device
     test('get non existing device', () async {
       final response = await api.get('non-existing-device');
       expect(response.body, 'Not Found');

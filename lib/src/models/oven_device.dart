@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/home_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/payloads/device_event.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_settings.dart';
@@ -29,6 +33,35 @@ class DeviceOven extends HomeDevice {
     };
   }
 
+  void updateStatus(Map<String, dynamic> stats) {
+    List<DeviceStatus> statList = (stats['status'] as List)
+        .map((stat) => DeviceStatus.fromPayload(stat))
+        .toList();
+    status = statList;
+  }
+
+  @override
+  Map<String, dynamic> getStatus() {
+    Map<String, dynamic> response = {};
+    for (var stat in status) {
+      response.addAll({
+        stat.key: stat.value,
+      });
+    }
+    return response;
+  }
+
+  @override
+  Map<String, dynamic> showOptions() {
+    Map<String, dynamic> response = {};
+    for (var option in options) {
+      response.addAll({
+        option.key: option.constraints.toPayload(),
+      });
+    }
+    return response;
+  }
+
   @override
   void turnOff() {
     final key = settingsMap[OvenSettings.power];
@@ -45,5 +78,18 @@ class DeviceOven extends HomeDevice {
     final payload = toPowerPayload(key!, value!);
 
     api.putPowerState(deviceHaId, key, payload);
+  }
+
+  @override
+  void updateStatusFromEvent(Event event) {
+    Map<String, dynamic> eventMap = json.decode(event.data!);
+    List<dynamic> list = eventMap['items'];
+    DeviceEvent deviceEvent = DeviceEvent.fromPayload(list[0]);
+
+    for (var stat in status) {
+      if (stat.key == deviceEvent.key) {
+        stat.value = deviceEvent.value;
+      }
+    }
   }
 }

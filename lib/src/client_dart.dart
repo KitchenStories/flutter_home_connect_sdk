@@ -107,7 +107,7 @@ class HomeConnectApi {
     }
   }
 
-  Future<void> startListening(String haid) async {
+  Future<void> startListening(String haid, Function callback) async {
     final path = "$baseUrl/$haid/events";
     final uri = Uri.tryParse(path);
     if (uri == null) {
@@ -121,9 +121,7 @@ class HomeConnectApi {
     );
 
     subscription = eventSource.listen((Event event) {
-      print("New event:");
-      print("  event: ${event.event}");
-      print("  data: ${event.data}");
+      callback(event);
     });
   }
 }

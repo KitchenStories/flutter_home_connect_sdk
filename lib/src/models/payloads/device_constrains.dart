@@ -14,10 +14,12 @@ class DeviceConstrains {
     return DeviceConstrains(
       min: json['min'] as int? ?? 0,
       max: json['max'] as int? ?? 100,
-      stepsize: json['stepsize'] as int? ?? 5,
+      stepsize: json['stepsize'] as int? ?? 1,
     );
   }
 
+  // create a toPayload method to convert the object to a json payload
+  Map<String, dynamic> toPayload() => _$DeviceConstrainsToJson(this);
   factory DeviceConstrains.fromJson(Map<String, dynamic> json) =>
       _$DeviceConstrainsFromJson(json);
 }

@@ -1,8 +1,8 @@
 class DeviceStatus {
   final String key;
-  final String value;
+  String value = '';
 
-  DeviceStatus(this.key, this.value);
+  DeviceStatus(this.key, String value);
   factory DeviceStatus.fromPayload(Map<String, dynamic> payload) {
     return DeviceStatus(
       payload['key'],
