@@ -12,6 +12,7 @@ export 'src/models/payloads/device_info.dart';
 export 'src/models/payloads/device_options.dart';
 export 'src/models/payloads/device_settings.dart';
 export 'src/models/payloads/device_status.dart';
+export 'src/models/payloads/device_program.dart';
 
 
 // TODO: Export any libraries intended for clients of this package.

@@ -6,16 +6,21 @@ import 'package:flutter_home_connect_sdk/src/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_event.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
+import 'package:flutter_home_connect_sdk/src/models/payloads/device_program.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_settings.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
 
 class DeviceOven extends HomeDevice {
   DeviceOven(HomeConnectApi api, DeviceInfo info, List<DeviceOptions> options,
-      List<DeviceStatus> status)
-      : super(api, info, options, status);
+      List<DeviceStatus> status, List<DeviceProgram> programs)
+      : super(api, info, options, status, programs);
 
-  factory DeviceOven.fromPayload(HomeConnectApi api, Map<String, dynamic> info,
-      Map<String, dynamic> opJson, Map<String, dynamic> stats) {
+  factory DeviceOven.fromPayload(
+      HomeConnectApi api,
+      Map<String, dynamic> info,
+      Map<String, dynamic> opJson,
+      Map<String, dynamic> stats,
+      Map<String, dynamic> programs) {
     DeviceType deviceType = deviceTypeMap[info['type']]!;
     DeviceInfo dInfo = DeviceInfo.fromPayload(info, deviceType);
     List<DeviceOptions> options = (opJson['options'] as List)
@@ -24,11 +29,14 @@ class DeviceOven extends HomeDevice {
     List<DeviceStatus> statList = (stats['status'] as List)
         .map((stat) => DeviceStatus.fromPayload(stat))
         .toList();
-    return DeviceOven(api, dInfo, options, statList);
+    List<DeviceProgram> prList = (programs['programs'] as List)
+        .map((program) => DeviceProgram.fromPayload(program))
+        .toList();
+    return DeviceOven(api, dInfo, options, statList, prList);
   }
 
   factory DeviceOven.fromInfoPayload(HomeConnectApi api, DeviceInfo info) {
-    return DeviceOven(api, info, [], []);
+    return DeviceOven(api, info, [], [], []);
   }
   Map<String, dynamic> toPowerPayload(String key, dynamic value) {
     return {

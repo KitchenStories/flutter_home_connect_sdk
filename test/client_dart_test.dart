@@ -69,8 +69,9 @@ void main() {
     }
   };
 
-  final device = DeviceOven.fromPayload(
-      api, info, someResponse['data'], someStatResponse['data']);
+  Map<String, dynamic> someProgramResponse = {};
+  final device = DeviceOven.fromPayload(api, info, someResponse['data'],
+      someStatResponse['data'], someProgramResponse);
 
   group('Api test', () {
     test('correct uri', () async {

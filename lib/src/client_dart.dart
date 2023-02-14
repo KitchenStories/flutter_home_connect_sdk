@@ -12,6 +12,28 @@ class HomeConnectApi {
   late final HomeDevice devices;
   late StreamSubscription<Event> subscription;
 
+  Map<String, dynamic> programsResponse = {
+    "data": {
+      "programs": [
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.HotAir",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.PizzaSetting",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        }
+      ]
+    }
+  };
   Map<String, dynamic> optionsResponse = {
     "data": {
       "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
@@ -40,7 +62,6 @@ class HomeConnectApi {
     "enumber": "HCS01OVN1/03",
     "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB"
   };
-
   Map<String, dynamic> statResponse = {
     "data": {
       "status": [
@@ -61,8 +82,13 @@ class HomeConnectApi {
   HomeConnectApi(this.baseUrl, {required this.accessToken}) {
     client = http.Client();
 
-    devices = DeviceOven.fromPayload(
-        this, info, optionsResponse['data'], statResponse['data']);
+    // devices = DeviceOven.fromPayload(
+    //   this,
+    //   info,
+    //   optionsResponse['data'],
+    //   statResponse['data'],
+    //   programsResponse['data'],
+    // );
   }
 
   Future<http.Response> get(String resource) async {
@@ -128,16 +154,21 @@ class HomeConnectApi {
   }
 
   Future<HomeDevice> getDevice(HomeDevice device) async {
-    final programsResponse = await getOptions(device.info.haId);
+    final devicePrograms = await getPrograms(device.info.haId);
+    final deviceOptions = await getOptions(device.info.haId);
     final statResponse = await getStatus(device.info.haId);
     final deviceType = device.info.type;
     switch (deviceType) {
       case DeviceType.oven:
-        // DeviceOven.fromPayload(
-        //     this, device.info, programsResponse['data'], statResponse['data']);
-        // device.options = programsResponse;
-        // device.status = statResponse;
-        break;
+        device.programs = devicePrograms;
+        print(devicePrograms);
+        device.status = statResponse;
+        return device;
+      // DeviceOven.fromPayload(
+      //     this, device.info, programsResponse['data'], statResponse['data']);
+      // device.options = programsResponse;
+      // device.status = statResponse;
+
       case DeviceType.dryer:
         // result.add(DeviceDryer.fromPayload(this, device, settings, status));
         break;
@@ -199,7 +230,7 @@ class HomeConnectApi {
     });
   }
 
-  Future<DeviceOptions> getOptions(String haId) {
+  Future<List<DeviceOptions>> getOptions(String haId) {
     Map<String, dynamic> programsResponse = {
       "data": {
         "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
@@ -219,12 +250,14 @@ class HomeConnectApi {
         ]
       }
     };
-    DeviceOptions op = DeviceOptions.fromPayload(programsResponse['data']);
-    var options = Future.delayed(Duration(seconds: 1), () => op);
-    return options;
+    List<DeviceOptions> options = (programsResponse['data']['options'] as List)
+        .map((e) => DeviceOptions.fromPayload(e))
+        .toList();
+    var list = Future.delayed(Duration(seconds: 1), () => options);
+    return list;
   }
 
-  Future<DeviceStatus> getStatus(String haId) {
+  Future<List<DeviceStatus>> getStatus(String haId) {
     Map<String, dynamic> statResponse = {
       "data": {
         "status": [
@@ -242,8 +275,41 @@ class HomeConnectApi {
         ]
       }
     };
-    DeviceStatus st = DeviceStatus.fromPayload(statResponse['data']);
-    var response = Future.delayed(Duration(seconds: 1), () => st);
+    List<DeviceStatus> stList = (statResponse['data']['status'] as List)
+        .map((e) => DeviceStatus.fromPayload(e))
+        .toList();
+    var response = Future.delayed(Duration(seconds: 1), () => stList);
     return response;
+  }
+
+  Future<List<DeviceProgram>> getPrograms(String haId) {
+    Map<String, dynamic> programsResponse = {
+      "data": {
+        "programs": [
+          {
+            "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
+            "constraints": {"available": true, "execution": "selectandstart"}
+          },
+          {
+            "key": "Cooking.Oven.Program.HeatingMode.HotAir",
+            "constraints": {"available": true, "execution": "selectandstart"}
+          },
+          {
+            "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
+            "constraints": {"available": true, "execution": "selectandstart"}
+          },
+          {
+            "key": "Cooking.Oven.Program.HeatingMode.PizzaSetting",
+            "constraints": {"available": true, "execution": "selectandstart"}
+          }
+        ]
+      }
+    };
+    List<DeviceProgram> prs = (programsResponse['data']['programs'] as List)
+        .map((e) => DeviceProgram.fromPayload(e))
+        .toList();
+
+    var programs = Future.delayed(Duration(seconds: 1), () => prs);
+    return programs;
   }
 }
