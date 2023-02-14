@@ -33,5 +33,5 @@ const _$DeviceTypeEnumMap = {
   DeviceType.dryer: 'dryer',
   DeviceType.washer: 'washer',
   DeviceType.fridgeFreezer: 'fridgeFreezer',
-  DeviceType.dishWasher: 'dishWasher',
+  DeviceType.dishwasher: 'dishwasher',
 };

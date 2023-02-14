@@ -4,15 +4,15 @@ import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
 
-enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishWasher }
+enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishwasher }
 
 Map<String, DeviceType> deviceTypeMap = {
   "Oven": DeviceType.oven,
-  "coffee maker": DeviceType.coffeeMaker,
-  "dryer": DeviceType.dryer,
-  "washer": DeviceType.washer,
-  "fridge freezer": DeviceType.fridgeFreezer,
-  "dish washer": DeviceType.dishWasher
+  "CoffeeMaker": DeviceType.coffeeMaker,
+  "Dryer": DeviceType.dryer,
+  "Washer": DeviceType.washer,
+  "FridgeFreezer": DeviceType.fridgeFreezer,
+  "Dishwasher": DeviceType.dishwasher
 };
 
 abstract class HomeDevice {

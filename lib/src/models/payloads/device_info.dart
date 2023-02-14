@@ -21,6 +21,10 @@ class DeviceInfo {
         payload['connected'], deviceType, payload['enumber'], payload['haId']);
   }
 
+  static DeviceInfo empty() {
+    return DeviceInfo('', '', '', false, DeviceType.oven, '', '');
+  }
+
   factory DeviceInfo.fromJson(Map<String, dynamic> json) =>
       _$DeviceInfoFromJson(json);
 }
