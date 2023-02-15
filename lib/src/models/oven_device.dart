@@ -33,6 +33,7 @@ class DeviceOven extends HomeDevice {
         .map((program) => DeviceProgram.fromPayload(program))
         .toList();
     return DeviceOven(api, dInfo, options, statList, prList);
+
   }
 
   factory DeviceOven.fromInfoPayload(HomeConnectApi api, DeviceInfo info) {
@@ -46,9 +47,7 @@ class DeviceOven extends HomeDevice {
   }
 
   void updateStatus(Map<String, dynamic> stats) {
-    List<DeviceStatus> statList = (stats['status'] as List)
-        .map((stat) => DeviceStatus.fromPayload(stat))
-        .toList();
+    List<DeviceStatus> statList = (stats['status'] as List).map((stat) => DeviceStatus.fromPayload(stat)).toList();
     status = statList;
   }
 
