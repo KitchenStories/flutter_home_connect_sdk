@@ -4,7 +4,6 @@ import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 
 import 'package:http/http.dart' as http;
-import './auth.dart' show HomeConnectClientCredentials, HomeConnectAuth;
 
 class HomeConnectApi {
   late http.Client client;
