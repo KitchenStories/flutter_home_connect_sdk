@@ -1,11 +1,18 @@
-import 'package:flutter_home_connect_sdk/src/client_dart.dart';
-import 'package:flutter_home_connect_sdk/src/models/oven_device.dart';
+import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
-  HomeConnectApi api = HomeConnectApi('example.com', accessToken: 'sometoken');
+  HomeConnectApi api = HomeConnectApi(
+    'example.com',
+    accessToken: 'sometoken',
+    credentials: HomeConnectClientCredentials(
+      clientId: 'clientid',
+      clientSecret: 'clientsecret',
+      redirectUri: 'https://example.com',
+    ),
+  );
   final mockClient = MockClient((request) async {
     if (request.url.path == "/success") {
       return http.Response('{"data": "some data"}', 200);

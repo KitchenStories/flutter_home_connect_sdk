@@ -11,6 +11,7 @@ class HomeConnectApi {
   String accessToken;
   late final HomeDevice devices;
   late StreamSubscription<Event> subscription;
+  HomeConnectClientCredentials credentials;
 
   Map<String, dynamic> optionsResponse = {
     "data": {
@@ -31,6 +32,7 @@ class HomeConnectApi {
       ]
     }
   };
+
   Map<String, dynamic> info = {
     "name": "Oven Simulator",
     "brand": "BOSCH",
@@ -52,10 +54,28 @@ class HomeConnectApi {
       ]
     }
   };
-  HomeConnectApi(this.baseUrl, {required this.accessToken}) {
+
+  HomeConnectAuth? authenticator;
+
+  HomeConnectApi(
+    this.baseUrl,
+    {
+      required this.accessToken,
+      required this.credentials,
+      this.authenticator,
+    }) {
     client = http.Client();
 
     devices = DeviceOven.fromPayload(this, info, optionsResponse['data'], statResponse['data']);
+  }
+
+  Future<void> authenticate() {
+    if (authenticator == null) {
+      throw Exception('No authenticator provided');
+    }
+    return authenticator!.authorize(credentials).then((credentials) {
+      accessToken = credentials.accessToken;
+    });
   }
 
   Future<http.Response> get(String resource) async {
