@@ -1,7 +1,4 @@
-
-import 'package:flutter_home_connect_sdk/src/client_dart.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
-
 
 const accessToken = "Your dev token";
 
