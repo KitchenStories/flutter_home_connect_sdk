@@ -69,10 +69,30 @@ void main() {
     }
   };
 
-  Map<String, dynamic> someProgramResponse = {};
+  Map<String, dynamic> programsResponse = {
+    "data": {
+      "programs": [
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.HotAir",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.PizzaSetting",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        }
+      ]
+    }
+  };
   final device = DeviceOven.fromPayload(api, info, someResponse['data'],
-      someStatResponse['data'], someProgramResponse);
-
+      someStatResponse['data'], programsResponse['data']);
 
   group('Api test', () {
     test('correct uri', () async {
