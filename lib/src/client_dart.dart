@@ -11,79 +11,26 @@ class HomeConnectApi {
   String accessToken;
   late final HomeDevice devices;
   late StreamSubscription<Event> subscription;
+  HomeConnectClientCredentials credentials;
 
-  Map<String, dynamic> programsResponse = {
-    "data": {
-      "programs": [
-        {
-          "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
-          "constraints": {"available": true, "execution": "selectandstart"}
-        },
-        {
-          "key": "Cooking.Oven.Program.HeatingMode.HotAir",
-          "constraints": {"available": true, "execution": "selectandstart"}
-        },
-        {
-          "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
-          "constraints": {"available": true, "execution": "selectandstart"}
-        },
-        {
-          "key": "Cooking.Oven.Program.HeatingMode.PizzaSetting",
-          "constraints": {"available": true, "execution": "selectandstart"}
-        }
-      ]
-    }
-  };
-  Map<String, dynamic> optionsResponse = {
-    "data": {
-      "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
-      "options": [
-        {
-          "key": "Cooking.Oven.Option.SetpointTemperature",
-          "type": "Int",
-          "unit": "°C",
-          "constraints": {"min": 30, "max": 250, "stepsize": 5}
-        },
-        {
-          "key": "BSH.Common.Option.Duration",
-          "type": "Int",
-          "unit": "seconds",
-          "constraints": {"min": 1, "max": 86340}
-        }
-      ]
-    }
-  };
-  Map<String, dynamic> info = {
-    "name": "Oven Simulator",
-    "brand": "BOSCH",
-    "vib": "HCS01OVN1",
-    "connected": true,
-    "type": "Oven",
-    "enumber": "HCS01OVN1/03",
-    "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB"
-  };
-  Map<String, dynamic> statResponse = {
-    "data": {
-      "status": [
-        {"key": "BSH.Common.Status.RemoteControlActive", "value": true},
-        {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": true},
-        {"key": "BSH.Common.Status.OperationState", "value": "BSH.Common.EnumType.OperationState.Ready"},
-        {"key": "BSH.Common.Status.DoorState", "value": "BSH.Common.EnumType.DoorState.Closed"},
-        {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": 20}
-      ]
-    }
-  };
-  HomeConnectApi(this.baseUrl, {required this.accessToken}) {
+  HomeConnectAuth? authenticator;
+
+  HomeConnectApi(
+    this.baseUrl, {
+    required this.accessToken,
+    required this.credentials,
+    this.authenticator,
+  }) {
     client = http.Client();
+  }
 
-    // devices = DeviceOven.fromPayload(
-    //   this,
-    //   info,
-    //   optionsResponse['data'],
-    //   statResponse['data'],
-    //   programsResponse['data'],
-    // );
-
+  Future<void> authenticate() {
+    if (authenticator == null) {
+      throw Exception('No authenticator provided');
+    }
+    return authenticator!.authorize(credentials).then((credentials) {
+      accessToken = credentials.accessToken;
+    });
   }
 
   Future<http.Response> get(String resource) async {
@@ -180,7 +127,8 @@ class HomeConnectApi {
     return h!;
   }
 
-  Future<void> putPowerState(String haId, String settingKey, Map<String, dynamic> payload) async {
+  Future<void> putPowerState(
+      String haId, String settingKey, Map<String, dynamic> payload) async {
     final path = "$baseUrl/$haId/settings/$settingKey";
     final uri = Uri.tryParse(path);
     if (uri == null) {
@@ -264,31 +212,17 @@ class HomeConnectApi {
     });
   }
 
-  Future<List<DeviceOptions>> getOptions(String haId) {
-    Map<String, dynamic> programsResponse = {
-      "data": {
-        "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
-        "options": [
-          {
-            "key": "Cooking.Oven.Option.SetpointTemperature",
-            "type": "Int",
-            "unit": "°C",
-            "constraints": {"min": 30, "max": 250, "stepsize": 5}
-          },
-          {
-            "key": "BSH.Common.Option.Duration",
-            "type": "Int",
-            "unit": "seconds",
-            "constraints": {"min": 1, "max": 86340}
-          }
-        ]
-      }
-    };
-    List<DeviceOptions> options = (programsResponse['data']['options'] as List)
+  Future<List<DeviceOptions>> getProgramOptions(
+      {required String haId, required String programKey}) async {
+    String path = "$haId/programs/available/$programKey";
+    var res = await get(path);
+    var data = json.decode(res.body);
+    // Each program contains a list of options so we need to loop through each
+    // option and then we create a DeviceOption object from the payload
+    List<DeviceOptions> options = (data['data']['options'] as List)
         .map((e) => DeviceOptions.fromPayload(e))
         .toList();
-    var list = Future.delayed(Duration(seconds: 1), () => options);
-    return list;
+    return options;
   }
 
   Future<List<DeviceStatus>> getStatus(String haId) {
@@ -297,8 +231,14 @@ class HomeConnectApi {
         "status": [
           {"key": "BSH.Common.Status.RemoteControlActive", "value": true},
           {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": true},
-          {"key": "BSH.Common.Status.OperationState", "value": "BSH.Common.EnumType.OperationState.Ready"},
-          {"key": "BSH.Common.Status.DoorState", "value": "BSH.Common.EnumType.DoorState.Closed"},
+          {
+            "key": "BSH.Common.Status.OperationState",
+            "value": "BSH.Common.EnumType.OperationState.Ready"
+          },
+          {
+            "key": "BSH.Common.Status.DoorState",
+            "value": "BSH.Common.EnumType.DoorState.Closed"
+          },
           {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": 20}
         ]
       }
@@ -340,15 +280,8 @@ class HomeConnectApi {
             .toList();
     // Loop through each program from programResponse
     for (var devProgram in programs) {
-      // Generate the path for the uri
-      String path = "$haId/programs/available/${devProgram.key}";
-      var res = await get(path);
-      var data = json.decode(res.body);
-      // Each program contains a list of options so we need to loop through each
-      // option and then we create a DeviceOption object from the payload
-      List<DeviceOptions> options = (data['data']['options'] as List)
-          .map((e) => DeviceOptions.fromPayload(e))
-          .toList();
+      var options =
+          await getProgramOptions(haId: haId, programKey: devProgram.key);
       devProgram.options = options;
     }
     return programs;
