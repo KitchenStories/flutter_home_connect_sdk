@@ -4,7 +4,6 @@ class DeviceStatus {
 
   DeviceStatus(this.key, String value);
   factory DeviceStatus.fromPayload(Map<String, dynamic> payload) {
-    print("payload \n $payload");
     return DeviceStatus(
       payload['key'],
       payload['value'].toString(),

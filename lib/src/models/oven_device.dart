@@ -38,6 +38,7 @@ class DeviceOven extends HomeDevice {
   factory DeviceOven.fromInfoPayload(HomeConnectApi api, DeviceInfo info) {
     return DeviceOven(api, info, [], [], []);
   }
+
   Map<String, dynamic> toPowerPayload(String key, dynamic value) {
     return {
       "data": {"key": key, "value": value}

@@ -146,7 +146,6 @@ class HomeConnectApi {
             throw Exception('Unknown device type: $deviceType');
         }
       }
-      print(result);
       return result;
     } else {
       throw Exception('Error getting devices: ${response.body}');
@@ -155,19 +154,13 @@ class HomeConnectApi {
 
   Future<HomeDevice> getDevice(HomeDevice device) async {
     final devicePrograms = await getPrograms(device.info.haId);
-    final deviceOptions = await getOptions(device.info.haId);
     final statResponse = await getStatus(device.info.haId);
     final deviceType = device.info.type;
     switch (deviceType) {
       case DeviceType.oven:
         device.programs = devicePrograms;
-        print(devicePrograms);
         device.status = statResponse;
         return device;
-      // DeviceOven.fromPayload(
-      //     this, device.info, programsResponse['data'], statResponse['data']);
-      // device.options = programsResponse;
-      // device.status = statResponse;
 
       case DeviceType.dryer:
         // result.add(DeviceDryer.fromPayload(this, device, settings, status));
@@ -204,9 +197,7 @@ class HomeConnectApi {
 
     try {
       final response = await http.put(uri, headers: headers, body: body);
-      if (response.statusCode != 204) {
-        print(response.body);
-      }
+      if (response.statusCode != 204) {}
     } catch (e) {
       throw Exception("Error: $e");
     }
@@ -282,7 +273,7 @@ class HomeConnectApi {
     return response;
   }
 
-  Future<List<DeviceProgram>> getPrograms(String haId) {
+  Future<List<DeviceProgram>> getPrograms(String haId) async {
     Map<String, dynamic> programsResponse = {
       "data": {
         "programs": [
@@ -305,11 +296,24 @@ class HomeConnectApi {
         ]
       }
     };
-    List<DeviceProgram> prs = (programsResponse['data']['programs'] as List)
-        .map((e) => DeviceProgram.fromPayload(e))
-        .toList();
 
-    var programs = Future.delayed(Duration(seconds: 1), () => prs);
+    List<DeviceProgram> programs =
+        (programsResponse['data']['programs'] as List)
+            .map((e) => DeviceProgram.fromPayload(e))
+            .toList();
+    // Loop through each program from programResponse
+    for (var devProgram in programs) {
+      // Generate the path for the uri
+      String path = "$haId/programs/available/${devProgram.key}";
+      var res = await get(path);
+      var data = json.decode(res.body);
+      // Each program contains a list of options so we need to loop through each
+      // option and then we create a DeviceOption object from the payload
+      List<DeviceOptions> options = (data['data']['options'] as List)
+          .map((e) => DeviceOptions.fromPayload(e))
+          .toList();
+      devProgram.options = options;
+    }
     return programs;
   }
 }
