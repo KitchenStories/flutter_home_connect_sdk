@@ -16,8 +16,7 @@ DeviceInfo _$DeviceInfoFromJson(Map<String, dynamic> json) => DeviceInfo(
       json['haId'] as String,
     );
 
-Map<String, dynamic> _$DeviceInfoToJson(DeviceInfo instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$DeviceInfoToJson(DeviceInfo instance) => <String, dynamic>{
       'name': instance.name,
       'brand': instance.brand,
       'vib': instance.vib,
