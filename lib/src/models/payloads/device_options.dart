@@ -13,8 +13,8 @@ class DeviceOptions {
   DeviceOptions(this.key, this.type, this.unit, this.constraints);
 
   factory DeviceOptions.fromPayload(Map<String, dynamic> payload) {
-    return DeviceOptions(payload['key'], payload['type'], payload['unit'],
-        DeviceConstrains.fromPayload(payload['constraints']));
+    return DeviceOptions(
+        payload['key'], payload['type'], payload['unit'], DeviceConstrains.fromPayload(payload['constraints']));
   }
   Map<String, dynamic> toJson() => _$DeviceOptionsToJson(this);
 }

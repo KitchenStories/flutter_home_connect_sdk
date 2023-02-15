@@ -20,6 +20,5 @@ class DeviceConstrains {
 
   // create a toPayload method to convert the object to a json payload
   Map<String, dynamic> toPayload() => _$DeviceConstrainsToJson(this);
-  factory DeviceConstrains.fromJson(Map<String, dynamic> json) =>
-      _$DeviceConstrainsFromJson(json);
+  factory DeviceConstrains.fromJson(Map<String, dynamic> json) => _$DeviceConstrainsFromJson(json);
 }
