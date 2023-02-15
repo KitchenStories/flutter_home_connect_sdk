@@ -10,20 +10,16 @@ import 'package:flutter_home_connect_sdk/src/models/payloads/device_settings.dar
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
 
 class DeviceOven extends HomeDevice {
-  DeviceOven(HomeConnectApi api, DeviceInfo info, List<DeviceOptions> options,
-      List<DeviceStatus> status)
+  DeviceOven(HomeConnectApi api, DeviceInfo info, List<DeviceOptions> options, List<DeviceStatus> status)
       : super(api, info, options, status);
 
-  factory DeviceOven.fromPayload(HomeConnectApi api, Map<String, dynamic> info,
-      Map<String, dynamic> opJson, Map<String, dynamic> stats) {
+  factory DeviceOven.fromPayload(
+      HomeConnectApi api, Map<String, dynamic> info, Map<String, dynamic> opJson, Map<String, dynamic> stats) {
     DeviceType deviceType = deviceTypeMap[info['type']]!;
     DeviceInfo dInfo = DeviceInfo.fromPayload(info, deviceType);
-    List<DeviceOptions> options = (opJson['options'] as List)
-        .map((option) => DeviceOptions.fromPayload(option))
-        .toList();
-    List<DeviceStatus> statList = (stats['status'] as List)
-        .map((stat) => DeviceStatus.fromPayload(stat))
-        .toList();
+    List<DeviceOptions> options =
+        (opJson['options'] as List).map((option) => DeviceOptions.fromPayload(option)).toList();
+    List<DeviceStatus> statList = (stats['status'] as List).map((stat) => DeviceStatus.fromPayload(stat)).toList();
     return DeviceOven(api, dInfo, options, statList);
   }
 
@@ -37,9 +33,7 @@ class DeviceOven extends HomeDevice {
   }
 
   void updateStatus(Map<String, dynamic> stats) {
-    List<DeviceStatus> statList = (stats['status'] as List)
-        .map((stat) => DeviceStatus.fromPayload(stat))
-        .toList();
+    List<DeviceStatus> statList = (stats['status'] as List).map((stat) => DeviceStatus.fromPayload(stat)).toList();
     status = statList;
   }
 

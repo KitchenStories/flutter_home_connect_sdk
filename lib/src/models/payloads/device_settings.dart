@@ -9,8 +9,5 @@ Map<OvenSettings, String> settingsMap = {
 };
 
 Map<OvenSettings, Map<String, String>> validValuesMap = {
-  OvenSettings.power: {
-    'on': "BSH.Common.EnumType.PowerState.On",
-    'off': "BSH.Common.EnumType.PowerState.Standby"
-  }
+  OvenSettings.power: {'on': "BSH.Common.EnumType.PowerState.On", 'off': "BSH.Common.EnumType.PowerState.Standby"}
 };

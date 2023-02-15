@@ -46,14 +46,8 @@ class HomeConnectApi {
       "status": [
         {"key": "BSH.Common.Status.RemoteControlActive", "value": true},
         {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": true},
-        {
-          "key": "BSH.Common.Status.OperationState",
-          "value": "BSH.Common.EnumType.OperationState.Ready"
-        },
-        {
-          "key": "BSH.Common.Status.DoorState",
-          "value": "BSH.Common.EnumType.DoorState.Closed"
-        },
+        {"key": "BSH.Common.Status.OperationState", "value": "BSH.Common.EnumType.OperationState.Ready"},
+        {"key": "BSH.Common.Status.DoorState", "value": "BSH.Common.EnumType.DoorState.Closed"},
         {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": 20}
       ]
     }
@@ -61,8 +55,7 @@ class HomeConnectApi {
   HomeConnectApi(this.baseUrl, {required this.accessToken}) {
     client = http.Client();
 
-    devices = DeviceOven.fromPayload(
-        this, info, optionsResponse['data'], statResponse['data']);
+    devices = DeviceOven.fromPayload(this, info, optionsResponse['data'], statResponse['data']);
   }
 
   Future<http.Response> get(String resource) async {
@@ -128,8 +121,8 @@ class HomeConnectApi {
   }
 
   Future<HomeDevice> getDevice(HomeDevice device) async {
-    final programsResponse = await getOptions(device.info.haId);
-    final statResponse = await getStatus(device.info.haId);
+    //final programsResponse = await getOptions(device.info.haId);
+    //final statResponse = await getStatus(device.info.haId);
     final deviceType = device.info.type;
     switch (deviceType) {
       case DeviceType.oven:
@@ -161,8 +154,7 @@ class HomeConnectApi {
     return h!;
   }
 
-  Future<void> putPowerState(
-      String haId, String settingKey, Map<String, dynamic> payload) async {
+  Future<void> putPowerState(String haId, String settingKey, Map<String, dynamic> payload) async {
     final path = "$baseUrl/$haId/settings/$settingKey";
     final uri = Uri.tryParse(path);
     if (uri == null) {
@@ -230,14 +222,8 @@ class HomeConnectApi {
         "status": [
           {"key": "BSH.Common.Status.RemoteControlActive", "value": true},
           {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": true},
-          {
-            "key": "BSH.Common.Status.OperationState",
-            "value": "BSH.Common.EnumType.OperationState.Ready"
-          },
-          {
-            "key": "BSH.Common.Status.DoorState",
-            "value": "BSH.Common.EnumType.DoorState.Closed"
-          },
+          {"key": "BSH.Common.Status.OperationState", "value": "BSH.Common.EnumType.OperationState.Ready"},
+          {"key": "BSH.Common.Status.DoorState", "value": "BSH.Common.EnumType.DoorState.Closed"},
           {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": 20}
         ]
       }
