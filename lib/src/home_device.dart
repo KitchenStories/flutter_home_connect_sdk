@@ -33,12 +33,16 @@ abstract class HomeDevice {
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
+
+
   }
 
   String get deviceName => info.name;
   String get deviceHaId => info.haId;
 
+
   HomeDevice(this.api, this.info, this.options, this.status, this.programs);
+
 
   Map<String, dynamic> showOptions();
 
