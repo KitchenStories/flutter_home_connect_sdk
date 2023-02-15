@@ -33,22 +33,23 @@ abstract class HomeDevice {
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
-
-
   }
 
   String get deviceName => info.name;
   String get deviceHaId => info.haId;
 
-
   HomeDevice(this.api, this.info, this.options, this.status, this.programs);
-
 
   Map<String, dynamic> showOptions();
 
   Map<String, dynamic> getStatus();
 
   void updateStatusFromEvent(Event event);
+
+  void startProgram(
+      {required String haid,
+      required String programKey,
+      required Map<String, int> options});
 
   void turnOn();
 

@@ -203,6 +203,55 @@ class HomeConnectApi {
     }
   }
 
+  Future<void> startProgram(
+      {required String haid,
+      required String programKey,
+      required Map<String, int> options}) async {
+    final path = "$baseUrl/$haid/programs/active";
+    final uri = Uri.tryParse(path);
+    if (uri == null) {
+      throw Exception('Invalid URI: $path');
+    }
+    final headers = commonHeaders;
+    final body = json.encode({
+      'data': {
+        'key': programKey,
+        'options': options.entries
+            .map((e) => {'key': e.key, 'value': e.value})
+            .toList()
+      }
+    });
+
+    try {
+      final response = await http.put(uri, headers: headers, body: body);
+      if (response.statusCode != 204) {}
+    } catch (e) {
+      throw Exception("Error: $e");
+    }
+  }
+
+  Future<void> pauseProgram({required String haid}) async {
+    final path = "$baseUrl/$haid/commands/BSH.Common.Command.PauseProgram";
+    final uri = Uri.tryParse(path);
+    if (uri == null) {
+      throw Exception('Invalid URI: $path');
+    }
+    final headers = commonHeaders;
+    final body = json.encode({
+      'data': {
+        'key': 'BSH.Common.Command.PauseProgram',
+        'value': true,
+      }
+    });
+
+    try {
+      final response = await http.put(uri, headers: headers, body: body);
+      if (response.statusCode != 204) {}
+    } catch (e) {
+      throw Exception("Error: $e");
+    }
+  }
+
   Future<void> startListening(String haid, Function callback) async {
     final path = "$baseUrl/$haid/events";
     final uri = Uri.tryParse(path);

@@ -104,4 +104,12 @@ class DeviceOven extends HomeDevice {
       }
     }
   }
+
+  @override
+  void startProgram(
+      {required String haid,
+      required String programKey,
+      required Map<String, int> options}) {
+    api.startProgram(haid: haid, programKey: programKey, options: options);
+  }
 }
