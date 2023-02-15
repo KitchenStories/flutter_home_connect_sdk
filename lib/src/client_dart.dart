@@ -11,9 +11,27 @@ class HomeConnectApi {
   String accessToken;
   late final HomeDevice devices;
   late StreamSubscription<Event> subscription;
+  HomeConnectClientCredentials credentials;
 
-  HomeConnectApi(this.baseUrl, {required this.accessToken}) {
+  HomeConnectAuth? authenticator;
+
+  HomeConnectApi(
+    this.baseUrl,
+    {
+      required this.accessToken,
+      required this.credentials,
+      this.authenticator,
+    }) {
     client = http.Client();
+  }
+
+  Future<void> authenticate() {
+    if (authenticator == null) {
+      throw Exception('No authenticator provided');
+    }
+    return authenticator!.authorize(credentials).then((credentials) {
+      accessToken = credentials.accessToken;
+    });
   }
 
   Future<http.Response> get(String resource) async {

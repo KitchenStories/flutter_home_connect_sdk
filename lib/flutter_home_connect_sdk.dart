@@ -4,6 +4,7 @@
 library flutter_home_connect_sdk;
 
 export 'src/client_dart.dart';
+export 'src/auth.dart';
 export 'src/home_device.dart';
 export 'src/models/oven_device.dart';
 export 'src/models/payloads/device_event.dart';
