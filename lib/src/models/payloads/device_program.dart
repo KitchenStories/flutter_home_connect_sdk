@@ -8,5 +8,6 @@ class DeviceProgram {
 
   factory DeviceProgram.fromPayload(Map<String, dynamic> payload) {
     return DeviceProgram(payload['key'], []);
+
   }
 }
