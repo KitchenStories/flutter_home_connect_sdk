@@ -1,11 +1,18 @@
-import 'package:flutter_home_connect_sdk/src/client_dart.dart';
-import 'package:flutter_home_connect_sdk/src/models/oven_device.dart';
+import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
-  HomeConnectApi api = HomeConnectApi('example.com', accessToken: 'sometoken');
+  HomeConnectApi api = HomeConnectApi(
+    'example.com',
+    accessToken: 'sometoken',
+    credentials: HomeConnectClientCredentials(
+      clientId: 'clientid',
+      clientSecret: 'clientsecret',
+      redirectUri: 'https://example.com',
+    ),
+  );
   final mockClient = MockClient((request) async {
     if (request.url.path == "/success") {
       return http.Response('{"data": "some data"}', 200);
@@ -69,10 +76,30 @@ void main() {
     }
   };
 
-  Map<String, dynamic> someProgramResponse = {};
+  Map<String, dynamic> programsResponse = {
+    "data": {
+      "programs": [
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.HotAir",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        },
+        {
+          "key": "Cooking.Oven.Program.HeatingMode.PizzaSetting",
+          "constraints": {"available": true, "execution": "selectandstart"}
+        }
+      ]
+    }
+  };
   final device = DeviceOven.fromPayload(api, info, someResponse['data'],
-      someStatResponse['data'], someProgramResponse);
-
+      someStatResponse['data'], programsResponse['data']);
 
   group('Api test', () {
     test('correct uri', () async {
