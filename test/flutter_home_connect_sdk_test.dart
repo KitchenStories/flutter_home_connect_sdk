@@ -1,4 +1,4 @@
-import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
+import 'package:flutter_home_connect_sdk/src/flutter_home_connect_sdk_base.dart';
 import 'package:test/test.dart';
 
 void main() {

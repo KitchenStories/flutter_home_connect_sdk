@@ -1,6 +1,16 @@
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 
-void main() {
-  var awesome = Awesome();
-  print('awesome: ${awesome.isAwesome}');
+const accessToken = "Your dev token";
+
+void main() async {
+  HomeConnectApi api = HomeConnectApi(
+    'https://simulator.home-connect.com/api/homeappliances',
+    accessToken: accessToken,
+    credentials: HomeConnectClientCredentials(
+      clientId: 'Your client id',
+      clientSecret: 'Your client secret',
+      redirectUri: 'https://example.com',
+    ),
+  );
+  print("init $api");
 }
