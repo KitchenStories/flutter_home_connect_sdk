@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'device_event.g.dart';
+
+@JsonSerializable()
 class DeviceEvent {
   final String level;
   final String handling;
@@ -7,13 +12,8 @@ class DeviceEvent {
 
   DeviceEvent(this.level, this.handling, this.key, this.value, this.uri);
 
-  factory DeviceEvent.fromPayload(Map<String, dynamic> payload) {
-    return DeviceEvent(
-      payload['level'],
-      payload['handling'],
-      payload['key'],
-      payload['value'],
-      payload['uri'],
-    );
-  }
+  Map<String, dynamic> toJson() => _$DeviceEventToJson(this);
+
+  factory DeviceEvent.fromJson(Map<String, dynamic> json) =>
+      _$DeviceEventFromJson(json);
 }

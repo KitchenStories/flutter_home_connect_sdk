@@ -17,23 +17,20 @@ class DeviceOven extends HomeDevice {
 
   factory DeviceOven.fromPayload(
       HomeConnectApi api,
-      Map<String, dynamic> info,
-      Map<String, dynamic> opJson,
-      Map<String, dynamic> stats,
-      Map<String, dynamic> programs) {
-    DeviceType deviceType = deviceTypeMap[info['type']]!;
-    DeviceInfo dInfo = DeviceInfo.fromPayload(info, deviceType);
-    List<DeviceOptions> options = (opJson['options'] as List)
-        .map((option) => DeviceOptions.fromPayload(option))
-        .toList();
-    List<DeviceStatus> statList = (stats['status'] as List)
-        .map((stat) => DeviceStatus.fromPayload(stat))
-        .toList();
-    List<DeviceProgram> prList = (programs['programs'] as List)
-        .map((program) => DeviceProgram.fromPayload(program))
-        .toList();
-    return DeviceOven(api, dInfo, options, statList, prList);
-
+      DeviceInfo info,
+      List<DeviceOptions> options,
+      List<DeviceStatus> stats,
+      List<DeviceProgram> programs) {
+    // List<DeviceOptions> options = (opJson['options'] as List)
+    //     .map((option) => DeviceOptions.fromPayload(option))
+    //     .toList();
+    // List<DeviceStatus> statList = (stats['status'] as List)
+    //     .map((stat) => DeviceStatus.fromPayload(stat))
+    //     .toList();
+    // List<DeviceProgram> prList = (programs['programs'] as List)
+    //     .map((program) => DeviceProgram.fromPayload(program))
+    //     .toList();
+    return DeviceOven(api, info, options, stats, programs);
   }
 
   factory DeviceOven.fromInfoPayload(HomeConnectApi api, DeviceInfo info) {
@@ -46,31 +43,37 @@ class DeviceOven extends HomeDevice {
     };
   }
 
-  void updateStatus(Map<String, dynamic> stats) {
-    List<DeviceStatus> statList = (stats['status'] as List).map((stat) => DeviceStatus.fromPayload(stat)).toList();
-    status = statList;
+  void updateStatus(DeviceStatus stats) {
+    status.removeWhere((element) => element.key == stats.key);
+    status.add(stats);
+  }
+
+  Future<void> getPrograms() async {
+    try {
+      programs = await api.getPrograms(haId: info.haId);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
-  Map<String, dynamic> getStatus() {
-    Map<String, dynamic> response = {};
-    for (var stat in status) {
-      response.addAll({
-        stat.key: stat.value,
-      });
+  Future<void> selectProgram({required String programKey}) async {
+    try {
+      await api.selectProgram(haid: info.haId, programKey: programKey);
+      options = await api.getSelectedProgramOptions(haId: info.haId);
+      selectedProgram = DeviceProgram(programKey, options);
+      final constraints = await api.getProgramOptionsConstraints(
+          haId: info.haId, programKey: programKey);
+      for (var option in options) {
+        for (var constraint in constraints) {
+          if (option.key == constraint.key) {
+            option.constraints = constraint.constraints;
+          }
+        }
+      }
+    } catch (e) {
+      print(e);
     }
-    return response;
-  }
-
-  @override
-  Map<String, dynamic> showOptions() {
-    Map<String, dynamic> response = {};
-    for (var option in options) {
-      response.addAll({
-        option.key: option.constraints.toPayload(),
-      });
-    }
-    return response;
   }
 
   @override
@@ -95,7 +98,7 @@ class DeviceOven extends HomeDevice {
   void updateStatusFromEvent(Event event) {
     Map<String, dynamic> eventMap = json.decode(event.data!);
     List<dynamic> list = eventMap['items'];
-    DeviceEvent deviceEvent = DeviceEvent.fromPayload(list[0]);
+    DeviceEvent deviceEvent = DeviceEvent.fromJson(list[0]);
 
     for (var stat in status) {
       if (stat.key == deviceEvent.key) {
@@ -106,9 +109,7 @@ class DeviceOven extends HomeDevice {
 
   @override
   void startProgram(
-      {required String haid,
-      required String programKey,
-      required Map<String, int> options}) {
-    api.startProgram(haid: haid, programKey: programKey, options: options);
+      {required String programKey, required Map<String, int> options}) {
+    api.startProgram(haid: info.haId, programKey: programKey, options: options);
   }
 }

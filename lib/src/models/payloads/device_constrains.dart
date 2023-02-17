@@ -8,7 +8,7 @@ class DeviceConstrains {
   final int max;
   final int stepsize;
 
-  DeviceConstrains({this.min = 0, this.max = 100, this.stepsize = 5});
+  DeviceConstrains({this.min = 0, this.max = 100, this.stepsize = 1});
 
   factory DeviceConstrains.fromPayload(Map<String, dynamic> json) {
     return DeviceConstrains(
@@ -18,7 +18,8 @@ class DeviceConstrains {
     );
   }
 
-  // create a toPayload method to convert the object to a json payload
-  Map<String, dynamic> toPayload() => _$DeviceConstrainsToJson(this);
-  factory DeviceConstrains.fromJson(Map<String, dynamic> json) => _$DeviceConstrainsFromJson(json);
+  Map<String, dynamic> toJson() => _$DeviceConstrainsToJson(this);
+
+  factory DeviceConstrains.fromJson(Map<String, dynamic> json) =>
+      _$DeviceConstrainsFromJson(json);
 }

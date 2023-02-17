@@ -6,15 +6,27 @@ part 'device_options.g.dart';
 @JsonSerializable()
 class DeviceOptions {
   final String key;
-  final String type;
-  final String unit;
-  final DeviceConstrains constraints;
+  String? type = '';
+  String? unit = '';
+  String? value = '';
+  DeviceConstrains? constraints = DeviceConstrains();
 
-  DeviceOptions(this.key, this.type, this.unit, this.constraints);
+  DeviceOptions(this.key, this.type, this.unit, this.value, this.constraints);
 
-  factory DeviceOptions.fromPayload(Map<String, dynamic> payload) {
-    return DeviceOptions(
-        payload['key'], payload['type'], payload['unit'], DeviceConstrains.fromPayload(payload['constraints']));
-  }
+  // factory DeviceOptions.fromPayload(Map<String, dynamic> payload) {
+  //   return DeviceOptions(payload['key'], payload['type'], payload['unit'],
+  //       DeviceConstrains.fromPayload(payload['constraints']));
+  // }
   Map<String, dynamic> toJson() => _$DeviceOptionsToJson(this);
+
+  factory DeviceOptions.fromJson(Map<String, dynamic> json) => DeviceOptions(
+        json['key'] as String,
+        json['type'] ??= '',
+        json['unit'] ??= '',
+        json['value'].toString(),
+        json['constraints'] == null
+            ? null
+            : DeviceConstrains.fromJson(
+                json['constraints'] as Map<String, dynamic>),
+      );
 }

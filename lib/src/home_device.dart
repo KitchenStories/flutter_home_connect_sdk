@@ -19,13 +19,10 @@ Map<String, DeviceType> deviceTypeMap = {
 abstract class HomeDevice {
   final HomeConnectApi api;
   final DeviceInfo info;
+  late DeviceProgram selectedProgram;
   List<DeviceOptions> options;
   List<DeviceStatus> status;
   List<DeviceProgram> programs;
-
-  set info(DeviceInfo info) {
-    info = info;
-  }
 
   addOption(DeviceOptions option) {
     options.add(option);
@@ -40,16 +37,14 @@ abstract class HomeDevice {
 
   HomeDevice(this.api, this.info, this.options, this.status, this.programs);
 
-  Map<String, dynamic> showOptions();
-
-  Map<String, dynamic> getStatus();
-
   void updateStatusFromEvent(Event event);
 
+  Future<void> selectProgram({required String programKey});
+
+  Future<void> getPrograms();
+
   void startProgram(
-      {required String haid,
-      required String programKey,
-      required Map<String, int> options});
+      {required String programKey, required Map<String, int> options});
 
   void turnOn();
 
