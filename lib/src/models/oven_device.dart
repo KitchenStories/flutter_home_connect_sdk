@@ -21,15 +21,6 @@ class DeviceOven extends HomeDevice {
       List<DeviceOptions> options,
       List<DeviceStatus> stats,
       List<DeviceProgram> programs) {
-    // List<DeviceOptions> options = (opJson['options'] as List)
-    //     .map((option) => DeviceOptions.fromPayload(option))
-    //     .toList();
-    // List<DeviceStatus> statList = (stats['status'] as List)
-    //     .map((stat) => DeviceStatus.fromPayload(stat))
-    //     .toList();
-    // List<DeviceProgram> prList = (programs['programs'] as List)
-    //     .map((program) => DeviceProgram.fromPayload(program))
-    //     .toList();
     return DeviceOven(api, info, options, stats, programs);
   }
 
@@ -48,11 +39,13 @@ class DeviceOven extends HomeDevice {
     status.add(stats);
   }
 
-  Future<void> getPrograms() async {
+  @override
+  Future<List<DeviceProgram>> getPrograms() async {
     try {
       programs = await api.getPrograms(haId: info.haId);
+      return programs;
     } catch (e) {
-      print(e);
+      throw Exception("Something went wrong: $e");
     }
   }
 
@@ -72,10 +65,11 @@ class DeviceOven extends HomeDevice {
         }
       }
     } catch (e) {
-      print(e);
+      throw Exception("Something went wrong: $e");
     }
   }
 
+  /// Sets the [OvenSettings.power] enum to `off`
   @override
   void turnOff() {
     final key = settingsMap[OvenSettings.power];
@@ -85,6 +79,7 @@ class DeviceOven extends HomeDevice {
     api.putPowerState(deviceHaId, key, payload);
   }
 
+  /// Sets the [OvenSettings.power] enum to `on`
   @override
   void turnOn() {
     final key = settingsMap[OvenSettings.power];
@@ -109,7 +104,25 @@ class DeviceOven extends HomeDevice {
 
   @override
   void startProgram(
-      {required String programKey, required Map<String, int> options}) {
-    api.startProgram(haid: info.haId, programKey: programKey, options: options);
+      {String? programKey, required List<DeviceOptions> options}) {
+    programKey ??= selectedProgram.key;
+    if (programKey.isEmpty) {
+      throw Exception("No program selected");
+    }
+    try {
+      api.startProgram(
+          haid: info.haId, programKey: programKey, options: options);
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
+  }
+
+  @override
+  void stopProgram() {
+    try {
+      api.stopProgram(haid: info.haId);
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
   }
 }

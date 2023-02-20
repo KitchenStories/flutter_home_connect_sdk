@@ -41,13 +41,34 @@ abstract class HomeDevice {
 
   Future<void> selectProgram({required String programKey});
 
-  Future<void> getPrograms();
+  /// Gets the list of programs available for the selected home appliance
+  ///
+  /// Returns a list of [DeviceProgram] objects.
+  ///
+  /// Sets the [programs] property to the list of programs.
+  /// Trhows generic exception if the request fails.
+  Future<List<DeviceProgram>> getPrograms();
 
-  void startProgram(
-      {required String programKey, required Map<String, int> options});
+  /// Starts the selected program
+  ///
+  /// If no program is selected, throws an exception.
+  /// If you want to start a program without selecting it first, use [startProgram] with the [programKey].
+  ///
+  /// [programKey] - the key of the program to start, if not provided, the selected program will be used.
+  ///
+  /// [options] - a list of options for the program, e.g. temperature, duration, etc.
+  /// Trhows generic exception if the request fails.
+  void startProgram({String programKey, required List<DeviceOptions> options});
 
+  /// Stops the currently running program
+  ///
+  /// Trhows generic exception if the request fails.
+  void stopProgram();
+
+  /// Turns on the selected home appliance
   void turnOn();
 
+  /// Turns off the selected home appliance
   void turnOff();
 
   void listen() {
