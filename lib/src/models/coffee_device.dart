@@ -39,19 +39,24 @@ class CoffeeDevice extends HomeDevice {
   }
 
   @override
-  void startProgram(
-      {required String programKey, required Map<String, int> options}) {
-    // TODO: implement startProgram
-  }
-
-  @override
   Future<void> selectProgram({required String programKey}) async {
     // TODO: implement selectProgram
   }
 
   @override
-  Future<void> getPrograms() {
+  Future<List<DeviceProgram>> getPrograms() {
     // TODO: implement getPrograms
     throw UnimplementedError();
+  }
+
+  @override
+  void startProgram(
+      {String? programKey, required List<DeviceOptions> options}) {
+    // TODO: implement startProgram1
+  }
+
+  @override
+  void stopProgram() {
+    // TODO: implement stopProgram
   }
 }

@@ -3,13 +3,8 @@ import 'dart:convert';
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:flutter_home_connect_sdk/src/models/coffee_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/dryer_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/fridge_freezer_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
-
+import 'package:flutter_home_connect_sdk/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
-
-import 'models/dishwasher_device.dart';
 
 class HomeConnectApi {
   late http.Client client;
@@ -35,6 +30,8 @@ class HomeConnectApi {
       throw Exception('No authenticator provided');
     }
     return authenticator!.authorize(credentials).then((credentials) {
+      print('hello');
+      print(credentials.accessToken);
       accessToken = credentials.accessToken;
     });
   }
@@ -88,46 +85,46 @@ class HomeConnectApi {
             result.add(DeviceOven.fromInfoPayload(this, info));
 
             break;
-          case 'Dryer':
-            DryerDevice mock = DryerDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'Washer':
-            WasherDevice mock = WasherDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'Dishwasher':
-            DishwasherDevice mock = DishwasherDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'FridgeFreezer':
-            FridgeFreezerDevice mock = FridgeFreezerDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
+          // case 'Dryer':
+          //   DryerDevice mock = DryerDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'Washer':
+          //   WasherDevice mock = WasherDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'Dishwasher':
+          //   DishwasherDevice mock = DishwasherDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'FridgeFreezer':
+          //   FridgeFreezerDevice mock = FridgeFreezerDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
           case 'CoffeeMaker':
             CoffeeDevice mock = CoffeeDevice(
               this,
@@ -139,7 +136,7 @@ class HomeConnectApi {
             result.add(mock);
             break;
           default:
-            throw Exception('Unknown device type: $deviceType');
+          // throw Exception('Unknown device type: $deviceType');
         }
       }
       return result;
@@ -148,6 +145,7 @@ class HomeConnectApi {
     }
   }
 
+  // getDevice returns a HomeDevice with all the programs and status
   Future<HomeDevice> getDevice(HomeDevice device) async {
     final devicePrograms = await getPrograms(haId: device.info.haId);
     final statResponse = await getStatus(device.info.haId);
@@ -202,43 +200,33 @@ class HomeConnectApi {
   Future<void> startProgram(
       {required String haid,
       required String programKey,
-      required Map<String, int> options}) async {
+      required List<DeviceOptions> options}) async {
     final path = "$haid/programs/active";
 
     final headers = commonHeaders;
     final body = json.encode({
       'data': {
         'key': programKey,
-        'options': options.entries
-            .map((e) => {'key': e.key, 'value': e.value})
-            .toList()
+        'options': options.map((e) => compact(e.toJson())).toList()
       }
     });
 
-    try {
-      final response = await put(resource: path, headers: headers, body: body);
-      if (response.statusCode != 204) {}
-    } catch (e) {
-      throw Exception("Error: $e");
+    final response = await put(resource: path, headers: headers, body: body);
+    if (response.statusCode != 204) {
+      throw Exception('Error starting program: ${response.body}');
     }
   }
 
-  Future<void> pauseProgram({required String haid}) async {
-    final path = "$baseUrl/$haid/commands/BSH.Common.Command.PauseProgram";
+  Future<void> stopProgram({required String haid}) async {
+    final path = "$baseUrl/$haid/programs/active";
     final uri = Uri.tryParse(path);
     if (uri == null) {
       throw Exception('Invalid URI: $path');
     }
     final headers = commonHeaders;
-    final body = json.encode({
-      'data': {
-        'key': 'BSH.Common.Command.PauseProgram',
-        'value': true,
-      }
-    });
 
     try {
-      final response = await http.put(uri, headers: headers, body: body);
+      final response = await http.delete(uri, headers: headers);
       if (response.statusCode != 204) {}
     } catch (e) {
       throw Exception("Error: $e");
@@ -346,28 +334,6 @@ class HomeConnectApi {
 
   Future<List<DeviceProgram>> getPrograms({String? haId}) async {
     String deviceHaid = haId ?? devices.info.haId;
-    // Map<String, dynamic> programsResponse = {
-    //   "data": {
-    //     "programs": [
-    //       {
-    //         "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
-    //         "constraints": {"available": true, "execution": "selectandstart"}
-    //       },
-    //       {
-    //         "key": "Cooking.Oven.Program.HeatingMode.HotAir",
-    //         "constraints": {"available": true, "execution": "selectandstart"}
-    //       },
-    //       {
-    //         "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
-    //         "constraints": {"available": true, "execution": "selectandstart"}
-    //       },
-    //       {
-    //         "key": "Cooking.Oven.Program.HeatingMode.PizzaSetting",
-    //         "constraints": {"available": true, "execution": "selectandstart"}
-    //       }
-    //     ]
-    //   }
-    // };
 
     String path = "$deviceHaid/programs/available";
     final res = await get(path);
@@ -375,16 +341,30 @@ class HomeConnectApi {
         (json.decode(res.body)['data']['programs'] as List)
             .map((e) => DeviceProgram.fromJson(e))
             .toList();
-    // List<DeviceProgram> programs =
-    //     (programsResponse['data']['programs'] as List)
-    //         .map((e) => DeviceProgram.fromJson(e))
-    //         .toList();
-    // // Loop through each program from programResponse
-    // for (var devProgram in programs) {
-    //   var options =
-    //       await getProgramOptions(haId: haId, programKey: devProgram.key);
-    //   devProgram.options = options;
-    // }
     return programs;
+  }
+
+  Future<HomeConnectAuthCredentials> getAccessToken(String code) async {
+    final response = await client.post(
+      Uri.parse('https://simulator.home-connect.com/security/oauth/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': credentials.clientId,
+        'client_secret': credentials.clientSecret ?? '',
+        'redirect_uri': credentials.redirectUri,
+        'grant_type': 'authorization_code',
+        'code': code,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return HomeConnectAuthCredentials(
+        accessToken: jsonResponse['access_token'],
+        refreshToken: jsonResponse['refresh_token'],
+      );
+    } else {
+      throw Exception('Failed to get access token');
+    }
   }
 }

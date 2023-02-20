@@ -8,7 +8,7 @@ export 'src/auth.dart';
 export 'src/home_device.dart';
 export 'src/models/oven_device.dart';
 export 'src/models/payloads/device_event.dart';
-export 'src/models/payloads/device_constrains.dart';
+export 'src/models/payloads/option_constraints.dart';
 export 'src/models/payloads/device_info.dart';
 export 'src/models/payloads/device_options.dart';
 export 'src/models/payloads/device_settings.dart';

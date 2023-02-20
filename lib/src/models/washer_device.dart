@@ -24,12 +24,6 @@ class WasherDevice extends HomeDevice {
   }
 
   @override
-  void startProgram(
-      {required String programKey, required Map<String, int> options}) {
-    // TODO: implement startProgram
-  }
-
-  @override
   void turnOff() {
     // TODO: implement turnOff
   }
@@ -50,8 +44,19 @@ class WasherDevice extends HomeDevice {
   }
 
   @override
-  Future<void> getPrograms() {
+  Future<List<DeviceProgram>> getPrograms() {
     // TODO: implement getPrograms
     throw UnimplementedError();
+  }
+
+  @override
+  void stopProgram() {
+    // TODO: implement stopProgram
+  }
+
+  @override
+  void startProgram(
+      {String? programKey, required List<DeviceOptions> options}) {
+    // TODO: implement startProgram
   }
 }

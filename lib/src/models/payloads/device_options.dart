@@ -1,4 +1,4 @@
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_constrains.dart';
+import 'package:flutter_home_connect_sdk/src/models/payloads/option_constraints.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'device_options.g.dart';
@@ -8,8 +8,8 @@ class DeviceOptions {
   final String key;
   String? type = '';
   String? unit = '';
-  String? value = '';
-  DeviceConstrains? constraints = DeviceConstrains();
+  dynamic value;
+  OptionConstraints? constraints = OptionConstraints();
 
   DeviceOptions(this.key, this.type, this.unit, this.value, this.constraints);
 
@@ -23,10 +23,16 @@ class DeviceOptions {
         json['key'] as String,
         json['type'] ??= '',
         json['unit'] ??= '',
-        json['value'].toString(),
+        json['value'],
         json['constraints'] == null
             ? null
-            : DeviceConstrains.fromJson(
+            : OptionConstraints.fromJson(
                 json['constraints'] as Map<String, dynamic>),
       );
+
+  /// Creates a [DeviceOptions] object from a [key] and [value].
+  factory DeviceOptions.toCommandPayload(
+      {required String key, required dynamic value}) {
+    return DeviceOptions(key, null, null, value, null);
+  }
 }
