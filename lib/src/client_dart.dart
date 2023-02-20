@@ -8,10 +8,13 @@ import 'package:http/http.dart' as http;
 class HomeConnectApi {
   late http.Client client;
   String baseUrl;
-  String accessToken;
+  String _accessToken = '';
   late final HomeDevice devices;
   late StreamSubscription<Event> subscription;
+  /// oauth client credentials
   HomeConnectClientCredentials credentials;
+  HomeConnectAuth? authenticator;
+  HomeConnectAuthStorage storage = MemoryHomeConnectAuthStorage();
 
   Map<String, dynamic> optionsResponse = {
     "data": {
@@ -55,30 +58,64 @@ class HomeConnectApi {
     }
   };
 
-  HomeConnectAuth? authenticator;
-
   HomeConnectApi(
     this.baseUrl,
     {
-      required this.accessToken,
       required this.credentials,
+      HomeConnectAuthStorage? store,
       this.authenticator,
     }) {
     client = http.Client();
 
     devices = DeviceOven.fromPayload(this, info, optionsResponse['data'], statResponse['data']);
+
+    // set default storage
+    if (store != null) {
+      storage = store;
+    }
   }
 
-  Future<void> authenticate() {
+  void setAuthenticator(HomeConnectAuth authenticator) {
+    this.authenticator = authenticator;
+  }
+
+  Future<void> authenticate() async {
     if (authenticator == null) {
       throw Exception('No authenticator provided');
     }
-    return authenticator!.authorize(credentials).then((credentials) {
-      accessToken = credentials.accessToken;
-    });
+    final token = await authenticator!.authorize(credentials);
+    storage.setCredentials(token);
+  }
+
+  Future<bool> shouldRefreshToken() async {
+    final userCredentials = await storage.getCredentials();
+    print("User has access token ${userCredentials?.accessToken}");
+    if (userCredentials == null || userCredentials.isAccessTokenExpired()) {
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> refreshToken() async {
+    if (authenticator == null) {
+      throw Exception('No authenticator provided');
+    }
+    final userCredentials = await storage.getCredentials();
+    final tokens = await authenticator?.refresh(userCredentials!.refreshToken);
+    if (tokens == null) {
+      throw Exception('Failed to refresh token');
+    }
+    // set token in storage
+    await storage.setCredentials(tokens);
   }
 
   Future<http.Response> get(String resource) async {
+    if (await shouldRefreshToken()) {
+      await refreshToken();
+    }
+
+    final userCredentials = await storage.getCredentials();
+    _accessToken = userCredentials!.accessToken;
     var path = '$baseUrl/$resource';
     final uri = Uri.tryParse(path);
     if (uri == null) {
@@ -93,7 +130,7 @@ class HomeConnectApi {
 
   Map<String, String> get commonHeaders {
     final result = <String, String>{};
-    result['Authorization'] = 'Bearer $accessToken';
+    result['Authorization'] = 'Bearer $_accessToken';
     result['Content-Type'] = 'application/vnd.bsh.sdk.v1+json';
     return result;
   }
