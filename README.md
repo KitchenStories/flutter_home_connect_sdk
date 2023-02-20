@@ -58,4 +58,13 @@ classDiagram
 - run `myDevice.selectProgram(<program key>)` this will select the specified program and update the programs constrains and options.
 
 ## To start a program
-- run `myDevice.startProgram(<haid>, <programKey>, <options map>)`
+- run `myDevice.startProgram([options])`
+### Example
+```dart
+  final option1 = DeviceOptions.toCommandPayload(
+      key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
+  final option2 = DeviceOptions.toCommandPayload(
+      key: 'BSH.Common.Option.Duration', value: 500);
+
+  selectedDevice.startProgram(options: [option1, option2]);
+```
