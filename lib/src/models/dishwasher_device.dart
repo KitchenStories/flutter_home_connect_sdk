@@ -1,4 +1,5 @@
-import 'package:eventsource/src/event.dart';
+import 'package:eventsource/eventsource.dart';
+
 import 'package:flutter_home_connect_sdk/src/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
@@ -14,18 +15,6 @@ class DishwasherDevice extends HomeDevice {
       List<DeviceStatus> status,
       List<DeviceProgram> programs)
       : super(api, info, options, status, programs);
-
-  @override
-  Map<String, dynamic> getStatus() {
-    // TODO: implement getStatus
-    throw UnimplementedError();
-  }
-
-  @override
-  Map<String, dynamic> showOptions() {
-    // TODO: implement showOptions
-    throw UnimplementedError();
-  }
 
   @override
   void turnOff() {
@@ -54,13 +43,13 @@ class DishwasherDevice extends HomeDevice {
   }
 
   @override
-  void stopProgram() {
-    // TODO: implement stopProgram
-  }
-
-  @override
   void startProgram(
       {String? programKey, required List<DeviceOptions> options}) {
     // TODO: implement startProgram
+  }
+
+  @override
+  void stopProgram() {
+    // TODO: implement stopProgram
   }
 }

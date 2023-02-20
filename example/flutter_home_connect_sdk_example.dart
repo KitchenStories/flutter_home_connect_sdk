@@ -33,12 +33,13 @@ void main() async {
     print(element.unit);
   }
 
-  var option = DeviceOptions.toCommandPayload(
+  final option1 = DeviceOptions.toCommandPayload(
       key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
-  var option2 = DeviceOptions.toCommandPayload(
+  final option2 = DeviceOptions.toCommandPayload(
       key: 'BSH.Common.Option.Duration', value: 500);
 
-  selectedDevice.startProgram(options: [option, option2]);
+  selectedDevice.startProgram(options: [option1, option2]);
+
   await Future.delayed(Duration(seconds: 5));
   selectedDevice.stopProgram();
 }

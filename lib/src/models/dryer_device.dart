@@ -1,4 +1,4 @@
-import 'package:eventsource/src/event.dart';
+import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
@@ -10,18 +10,6 @@ class DryerDevice extends HomeDevice {
   DryerDevice(HomeConnectApi api, DeviceInfo info, List<DeviceOptions> options,
       List<DeviceStatus> status, List<DeviceProgram> programs)
       : super(api, info, options, status, programs);
-
-  @override
-  Map<String, dynamic> getStatus() {
-    // TODO: implement getStatus
-    throw UnimplementedError();
-  }
-
-  @override
-  Map<String, dynamic> showOptions() {
-    // TODO: implement showOptions
-    throw UnimplementedError();
-  }
 
   @override
   void turnOff() {
