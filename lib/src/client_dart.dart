@@ -62,7 +62,7 @@ class HomeConnectApi {
     this.baseUrl,
     {
       required this.credentials,
-      HomeConnectAuthStorage? store,
+      HomeConnectAuthStorage? storage,
       this.authenticator,
     }) {
     client = http.Client();
@@ -70,8 +70,8 @@ class HomeConnectApi {
     devices = DeviceOven.fromPayload(this, info, optionsResponse['data'], statResponse['data']);
 
     // set default storage
-    if (store != null) {
-      storage = store;
+    if (storage != null) {
+      this.storage = storage;
     }
   }
 
