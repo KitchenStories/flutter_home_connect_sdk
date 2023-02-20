@@ -21,7 +21,7 @@ class SandboxAuthorizer extends HomeConnectAuth {
   @override
   Future<HomeConnectAuthCredentials> refresh(String refreshToken) async {
     final res = await http.post(
-      Uri.parse(baseUrl + 'security/oauth/token'),
+      Uri.parse("${baseUrl}security/oauth/token"),
       body: {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,

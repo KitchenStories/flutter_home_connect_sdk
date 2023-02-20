@@ -3,16 +3,73 @@ import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+class TestAuthenticator extends HomeConnectAuth {
+  String baseUrl;
+
+  TestAuthenticator({
+    this.baseUrl = 'https://simulator.home-connect.com/'
+  });
+
+  @override
+  Future<HomeConnectAuthCredentials> authorize(HomeConnectClientCredentials credentials) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<HomeConnectAuthCredentials> refresh(String refreshToken) async {
+    return HomeConnectAuthCredentials(
+      accessToken: "refreshed",
+      refreshToken: "refreshed_token",
+    );
+  }
+}
+
+class TestCredentials extends HomeConnectAuthCredentials {
+  TestCredentials({
+    required super.accessToken,
+    required super.refreshToken,
+  });
+
+  @override
+  bool isAccessTokenExpired() {
+    return false;
+  }
+
+  @override
+  bool isRefreshTokenExpired() {
+    return false;
+  }
+}
+
+class TestStorage extends MemoryHomeConnectAuthStorage {
+  HomeConnectAuthCredentials? credentials;
+
+  @override
+  Future<HomeConnectAuthCredentials?> getCredentials() async {
+    return credentials;
+  }
+
+  @override
+  Future<void> setCredentials(HomeConnectAuthCredentials credentials) async {
+    this.credentials = credentials;
+  }
+}
+
 void main() {
   HomeConnectApi api = HomeConnectApi(
     'example.com',
-    accessToken: 'sometoken',
     credentials: HomeConnectClientCredentials(
       clientId: 'clientid',
       clientSecret: 'clientsecret',
       redirectUri: 'https://example.com',
     ),
+    authenticator: TestAuthenticator(),
   );
+  api.storage.setCredentials(TestCredentials(
+      accessToken: "test_token",
+      refreshToken: "test_refresh_token",
+  ));
+
   final mockClient = MockClient((request) async {
     if (request.url.path == "/success") {
       return http.Response('{"data": "some data"}', 200);
