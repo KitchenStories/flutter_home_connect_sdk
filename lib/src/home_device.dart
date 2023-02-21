@@ -16,6 +16,10 @@ Map<String, DeviceType> deviceTypeMap = {
   "Dishwasher": DeviceType.dishwasher
 };
 
+/// Base class for home devices
+///
+/// Contains the shared functionality for all appliances.
+///
 abstract class HomeDevice {
   final HomeConnectApi api;
   final DeviceInfo info;
