@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -10,20 +9,18 @@ const refreshToken = "Your refresh token";
 class SandboxAuthorizer extends HomeConnectAuth {
   String baseUrl;
 
-  SandboxAuthorizer({
-    this.baseUrl = 'https://simulator.home-connect.com/'
-  });
+  SandboxAuthorizer({this.baseUrl = 'https://simulator.home-connect.com/'});
 
   @override
-  Future<HomeConnectAuthCredentials> authorize(HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(
+      HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 
   @override
   Future<HomeConnectAuthCredentials> refresh(String refreshToken) async {
-    final res = await http.post(
-      Uri.parse("${baseUrl}security/oauth/token"),
-      body: {
+    final res =
+        await http.post(Uri.parse("${baseUrl}security/oauth/token"), body: {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,
     });
@@ -40,7 +37,6 @@ class SandboxAuthorizer extends HomeConnectAuth {
   }
 }
 
-
 void main() async {
   HomeConnectApi api = HomeConnectApi(
     'https://simulator.home-connect.com/api/homeappliances',
@@ -51,6 +47,11 @@ void main() async {
     ),
     authenticator: SandboxAuthorizer(),
   );
+
+  api.storage.setCredentials(HomeConnectAuthCredentials(
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  ));
 
   // print("init $api");
   final res = await api.getDevices();
@@ -81,12 +82,4 @@ void main() async {
 
   await Future.delayed(Duration(seconds: 5));
   selectedDevice.stopProgram();
-
-  api.storage.setCredentials(HomeConnectAuthCredentials(
-    accessToken: accessToken,
-    refreshToken: refreshToken,
-  ));
-  print("init $api");
-  final res = await api.getDevices();
-  print("devices $res");
 }
