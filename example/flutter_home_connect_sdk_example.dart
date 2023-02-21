@@ -9,20 +9,18 @@ const refreshToken = "Your refresh token";
 class SandboxAuthorizer extends HomeConnectAuth {
   String baseUrl;
 
-  SandboxAuthorizer({
-    this.baseUrl = 'https://simulator.home-connect.com/'
-  });
+  SandboxAuthorizer({this.baseUrl = 'https://simulator.home-connect.com/'});
 
   @override
-  Future<HomeConnectAuthCredentials> authorize(HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(
+      HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 
   @override
   Future<HomeConnectAuthCredentials> refresh(String refreshToken) async {
-    final res = await http.post(
-      Uri.parse("${baseUrl}security/oauth/token"),
-      body: {
+    final res =
+        await http.post(Uri.parse("${baseUrl}security/oauth/token"), body: {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,
     });
@@ -49,11 +47,39 @@ void main() async {
     ),
     authenticator: SandboxAuthorizer(),
   );
+
   api.storage.setCredentials(HomeConnectAuthCredentials(
     accessToken: accessToken,
     refreshToken: refreshToken,
   ));
-  print("init $api");
+
+  // print("init $api");
   final res = await api.getDevices();
-  print("devices $res");
+  var selectedDevice =
+      res.firstWhere((element) => element.info.type == DeviceType.oven);
+  selectedDevice = await api.getDevice(selectedDevice);
+  await selectedDevice.getPrograms();
+
+  print(selectedDevice.info.haId);
+  selectedDevice.programs.toList().forEach((element) {
+    print(element.key);
+  });
+  await selectedDevice.selectProgram(
+      programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+
+  print(selectedDevice.selectedProgram.options);
+  for (var element in selectedDevice.selectedProgram.options) {
+    print(element.constraints!.toJson());
+    print(element.unit);
+  }
+
+  final option1 = DeviceOptions.toCommandPayload(
+      key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
+  final option2 = DeviceOptions.toCommandPayload(
+      key: 'BSH.Common.Option.Duration', value: 500);
+
+  selectedDevice.startProgram(options: [option1, option2]);
+
+  await Future.delayed(Duration(seconds: 5));
+  selectedDevice.stopProgram();
 }

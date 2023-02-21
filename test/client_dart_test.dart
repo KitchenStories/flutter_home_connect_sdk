@@ -95,46 +95,9 @@ void main() {
     "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB"
   };
 
-  Map<String, dynamic> someResponse = {
-    "data": {
-      "key": "Cooking.Oven.Program.HeatingMode.PreHeating",
-      "options": [
-        {
-          "key": "Cooking.Oven.Option.SetpointTemperature",
-          "type": "Int",
-          "unit": "°C",
-          "constraints": {"min": 30, "max": 250, "stepsize": 5}
-        },
-        {
-          "key": "BSH.Common.Option.Duration",
-          "type": "Int",
-          "unit": "seconds",
-          "constraints": {"min": 1, "max": 86340}
-        }
-      ]
-    }
-  };
+  DeviceInfo infoPayload = DeviceInfo.fromJson(info);
 
-  Map<String, dynamic> someStatResponse = {
-    "data": {
-      "status": [
-        {"key": "BSH.Common.Status.RemoteControlActive", "value": true},
-        {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": true},
-        {
-          "key": "BSH.Common.Status.OperationState",
-          "value": "BSH.Common.EnumType.OperationState.Ready"
-        },
-        {
-          "key": "BSH.Common.Status.DoorState",
-          "value": "BSH.Common.EnumType.DoorState.Closed"
-        },
-        {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": 20}
-      ]
-    }
-  };
-
-  final device = DeviceOven.fromPayload(
-      api, info, someResponse['data'], someStatResponse['data']);
+  final device = DeviceOven.fromPayload(api, infoPayload, [], [], []);
 
   group('Api test', () {
     test('correct uri', () async {

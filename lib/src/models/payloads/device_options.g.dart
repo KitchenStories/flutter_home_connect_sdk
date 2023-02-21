@@ -6,16 +6,20 @@ part of 'device_options.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-DeviceOptions _$DeviceOptionsFromJson(Map<String, dynamic> json) => DeviceOptions(
+DeviceOptions _$DeviceOptionsFromJson(Map<String, dynamic> json) =>
+    DeviceOptions(
       json['key'] as String,
-      json['type'] as String,
-      json['unit'] as String,
-      DeviceConstrains.fromJson(json['constraints'] as Map<String, dynamic>),
+      json['type'] as String?,
+      json['unit'] as String?,
+      json['value'] as String?,
+      json['constraints'],
     );
 
-Map<String, dynamic> _$DeviceOptionsToJson(DeviceOptions instance) => <String, dynamic>{
+Map<String, dynamic> _$DeviceOptionsToJson(DeviceOptions instance) =>
+    <String, dynamic>{
       'key': instance.key,
       'type': instance.type,
       'unit': instance.unit,
+      'value': instance.value,
       'constraints': instance.constraints,
     };
