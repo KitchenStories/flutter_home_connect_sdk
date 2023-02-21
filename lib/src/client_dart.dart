@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:flutter_home_connect_sdk/src/models/coffee_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/dishwasher_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/dryer_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/fridge_freezer_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
 import 'package:flutter_home_connect_sdk/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,19 +16,18 @@ class HomeConnectApi {
   String _accessToken = '';
   late final HomeDevice devices;
   late StreamSubscription<Event> subscription;
+
   /// oauth client credentials
   HomeConnectClientCredentials credentials;
   HomeConnectAuth? authenticator;
   HomeConnectAuthStorage storage = MemoryHomeConnectAuthStorage();
 
-
   HomeConnectApi(
-    this.baseUrl,
-    {
-      required this.credentials,
-      HomeConnectAuthStorage? storage,
-      this.authenticator,
-    }) {
+    this.baseUrl, {
+    required this.credentials,
+    HomeConnectAuthStorage? storage,
+    this.authenticator,
+  }) {
     client = http.Client();
 
     // set default storage
@@ -71,6 +74,9 @@ class HomeConnectApi {
       {required String resource,
       required Map<String, String> headers,
       required String body}) async {
+    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+    _accessToken = userCredentials!.accessToken;
+
     var path = '$baseUrl/$resource';
     final uri = Uri.tryParse(path);
     if (uri == null) {
@@ -81,11 +87,7 @@ class HomeConnectApi {
   }
 
   Future<http.Response> get(String resource) async {
-    if (await shouldRefreshToken()) {
-      await refreshToken();
-    }
-
-    final userCredentials = await storage.getCredentials();
+    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
     var path = '$baseUrl/$resource';
     final uri = Uri.tryParse(path);
@@ -97,6 +99,16 @@ class HomeConnectApi {
       headers: commonHeaders,
     );
     return response;
+  }
+
+  Future<HomeConnectAuthCredentials?> checkTokenIntegrity() async {
+    print("Checking token integrity");
+    if (await shouldRefreshToken()) {
+      await refreshToken();
+    }
+
+    final userCredentials = await storage.getCredentials();
+    return userCredentials;
   }
 
   Map<String, String> get commonHeaders {
@@ -122,46 +134,46 @@ class HomeConnectApi {
             result.add(DeviceOven.fromInfoPayload(this, info));
 
             break;
-          // case 'Dryer':
-          //   DryerDevice mock = DryerDevice(
-          //     this,
-          //     DeviceInfo.fromJson(device),
-          //     [],
-          //     [],
-          //     [],
-          //   );
-          //   result.add(mock);
-          //   break;
-          // case 'Washer':
-          //   WasherDevice mock = WasherDevice(
-          //     this,
-          //     DeviceInfo.fromJson(device),
-          //     [],
-          //     [],
-          //     [],
-          //   );
-          //   result.add(mock);
-          //   break;
-          // case 'Dishwasher':
-          //   DishwasherDevice mock = DishwasherDevice(
-          //     this,
-          //     DeviceInfo.fromJson(device),
-          //     [],
-          //     [],
-          //     [],
-          //   );
-          //   result.add(mock);
-          //   break;
-          // case 'FridgeFreezer':
-          //   FridgeFreezerDevice mock = FridgeFreezerDevice(
-          //     this,
-          //     DeviceInfo.fromJson(device),
-          //     [],
-          //     [],
-          //     [],
-          //   );
-          //   result.add(mock);
-          //   break;
+          case 'Dryer':
+            DryerDevice mock = DryerDevice(
+              this,
+              DeviceInfo.fromJson(device),
+              [],
+              [],
+              [],
+            );
+            result.add(mock);
+            break;
+          case 'Washer':
+            WasherDevice mock = WasherDevice(
+              this,
+              DeviceInfo.fromJson(device),
+              [],
+              [],
+              [],
+            );
+            result.add(mock);
+            break;
+          case 'Dishwasher':
+            DishwasherDevice mock = DishwasherDevice(
+              this,
+              DeviceInfo.fromJson(device),
+              [],
+              [],
+              [],
+            );
+            result.add(mock);
+            break;
+          case 'FridgeFreezer':
+            FridgeFreezerDevice mock = FridgeFreezerDevice(
+              this,
+              DeviceInfo.fromJson(device),
+              [],
+              [],
+              [],
+            );
+            result.add(mock);
+            break;
           case 'CoffeeMaker':
             CoffeeDevice mock = CoffeeDevice(
               this,
@@ -182,7 +194,13 @@ class HomeConnectApi {
     }
   }
 
-  // getDevice returns a HomeDevice with all the programs and status
+  /// Returns the specific type of device with its programs and status.
+  ///
+  /// This method should be used after getDevices() to get the specific type of device.
+  /// Internally it calls getPrograms() and getStatus().
+  /// The returned device will be of the specific type. For example, if the device is an oven,
+  ///  the returned device will be of type DeviceOven.
+
   Future<HomeDevice> getDevice(HomeDevice device) async {
     final devicePrograms = await getPrograms(haId: device.info.haId);
     final statResponse = await getStatus(device.info.haId);
