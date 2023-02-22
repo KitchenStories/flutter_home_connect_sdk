@@ -239,7 +239,6 @@ class HomeConnectApi {
       required List<DeviceOptions> options}) async {
     final path = "$haid/programs/active";
 
-    final headers = commonHeaders;
     final body = json.encode({
       'data': {
         'key': programKey,
