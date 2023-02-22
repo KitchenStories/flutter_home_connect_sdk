@@ -85,7 +85,6 @@ class DeviceOven extends HomeDevice {
     final key = settingsMap[OvenSettings.power];
     final value = validValuesMap[OvenSettings.power]?['on'];
     final payload = toPowerPayload(key!, value!);
-
     api.putPowerState(deviceHaId, key, payload);
   }
 

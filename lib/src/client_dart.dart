@@ -73,15 +73,12 @@ class HomeConnectApi {
       {required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    print("put: $body");
     var path = '$baseUrl/$resource';
     final uri = Uri.tryParse(path);
     if (uri == null) {
       throw Exception('Invalid URI: $path');
     }
-    print("path: $path");
     final response = await client.put(uri, headers: commonHeaders, body: body);
-    print(response.statusCode);
     return response;
   }
 
@@ -225,9 +222,7 @@ class HomeConnectApi {
   Future<void> putPowerState(
       String haId, String settingKey, Map<String, dynamic> payload) async {
     final path = "$haId/settings/$settingKey";
-    print("hello");
     final body = json.encode(payload);
-    print("payload $body");
     try {
       final response = await put(resource: path, body: body);
       if (response.statusCode != 204) {
