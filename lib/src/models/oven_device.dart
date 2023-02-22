@@ -55,8 +55,8 @@ class DeviceOven extends HomeDevice {
       await api.selectProgram(haid: info.haId, programKey: programKey);
       options = await api.getSelectedProgramOptions(haId: info.haId);
       selectedProgram = DeviceProgram(programKey, options);
-      final constraints = await api.getProgramOptionsConstraints(
-          haId: info.haId, programKey: programKey);
+      final constraints =
+          await api.getProgramOptions(haId: info.haId, programKey: programKey);
       for (var option in options) {
         for (var constraint in constraints) {
           if (option.key == constraint.key) {
