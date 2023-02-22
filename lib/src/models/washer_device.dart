@@ -11,6 +11,14 @@ class WasherDevice extends HomeDevice {
       List<DeviceStatus> status, List<DeviceProgram> programs)
       : super(api, info, options, status, programs);
 
+  factory WasherDevice.fromPayload(
+      HomeConnectApi api,
+      DeviceInfo info,
+      List<DeviceOptions> options,
+      List<DeviceStatus> stats,
+      List<DeviceProgram> programs) {
+    return WasherDevice(api, info, options, stats, programs);
+  }
   @override
   void turnOff() {
     // TODO: implement turnOff

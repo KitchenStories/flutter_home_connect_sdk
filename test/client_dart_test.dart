@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
+import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -6,12 +9,11 @@ import 'package:http/testing.dart';
 class TestAuthenticator extends HomeConnectAuth {
   String baseUrl;
 
-  TestAuthenticator({
-    this.baseUrl = 'https://simulator.home-connect.com/'
-  });
+  TestAuthenticator({this.baseUrl = 'https://simulator.home-connect.com/'});
 
   @override
-  Future<HomeConnectAuthCredentials> authorize(HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(
+      HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 
@@ -66,8 +68,8 @@ void main() {
     authenticator: TestAuthenticator(),
   );
   api.storage.setCredentials(TestCredentials(
-      accessToken: "test_token",
-      refreshToken: "test_refresh_token",
+    accessToken: "test_token",
+    refreshToken: "test_refresh_token",
   ));
 
   final mockClient = MockClient((request) async {
@@ -136,5 +138,58 @@ void main() {
       final response = await api.get('non-existing-device');
       expect(response.body, 'Not Found');
     });
+  });
+
+  test('returns a list of HomeDevice', () async {
+    final mockResponseBody = {
+      "data": {
+        "homeappliances": [
+          {
+            "type": "Oven",
+            "id": "1",
+            "name": "Oven Simulator",
+            "brand": "BOSCH",
+            "vib": "HCS01OVN1",
+            "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB",
+            "enumber": "HCS01OVN1/03",
+            "connected": true,
+          },
+          {
+            "type": "Washer",
+            "id": "2",
+            "name": "Washer Simulator",
+            "brand": "BOSCH",
+            "vib": "HCS01WAS1",
+            "haId": "BOSCH-HCS01WAS1-54E7EF9DEDBB",
+            "enumber": "HCS01WAS1/03",
+            "connected": true,
+          }
+        ]
+      }
+    };
+
+    final mockClient = MockClient((request) async {
+      return http.Response(json.encode(mockResponseBody), 200);
+    });
+
+    HomeConnectApi api = HomeConnectApi(
+      'example.com',
+      credentials: HomeConnectClientCredentials(
+        clientId: 'clientid',
+        clientSecret: 'clientsecret',
+        redirectUri: 'https://example.com',
+      ),
+      authenticator: TestAuthenticator(),
+    );
+    api.storage.setCredentials(TestCredentials(
+      accessToken: "test_token",
+      refreshToken: "test_refresh_token",
+    ));
+    api.client = mockClient;
+    final devices = await api.getDevices();
+
+    expect(devices.length, 2);
+    expect(devices[0], isA<DeviceOven>());
+    expect(devices[1], isA<WasherDevice>());
   });
 }
