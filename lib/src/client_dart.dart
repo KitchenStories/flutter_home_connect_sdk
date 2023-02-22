@@ -50,7 +50,6 @@ class HomeConnectApi {
 
   Future<bool> shouldRefreshToken() async {
     final userCredentials = await storage.getCredentials();
-    print("User has access token ${userCredentials?.accessToken}");
     if (userCredentials == null || userCredentials.isAccessTokenExpired()) {
       return true;
     }
@@ -71,18 +70,18 @@ class HomeConnectApi {
   }
 
   Future<http.Response> put(
-      {required String resource,
-      required Map<String, String> headers,
-      required String body}) async {
+      {required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-
+    print("put: $body");
     var path = '$baseUrl/$resource';
     final uri = Uri.tryParse(path);
     if (uri == null) {
       throw Exception('Invalid URI: $path');
     }
+    print("path: $path");
     final response = await client.put(uri, headers: commonHeaders, body: body);
+    print(response.statusCode);
     return response;
   }
 
@@ -99,16 +98,6 @@ class HomeConnectApi {
       headers: commonHeaders,
     );
     return response;
-  }
-
-  Future<HomeConnectAuthCredentials?> checkTokenIntegrity() async {
-    print("Checking token integrity");
-    if (await shouldRefreshToken()) {
-      await refreshToken();
-    }
-
-    final userCredentials = await storage.getCredentials();
-    return userCredentials;
   }
 
   Map<String, String> get commonHeaders {
@@ -200,7 +189,6 @@ class HomeConnectApi {
   /// Internally it calls getPrograms() and getStatus().
   /// The returned device will be of the specific type. For example, if the device is an oven,
   ///  the returned device will be of type DeviceOven.
-
   Future<HomeDevice> getDevice(HomeDevice device) async {
     final devicePrograms = await getPrograms(haId: device.info.haId);
     final statResponse = await getStatus(device.info.haId);
@@ -227,7 +215,7 @@ class HomeConnectApi {
         // result.add(DeviceCoffeeMaker.fromPayload(this, device, settings, status));
         break;
       default:
-        throw Exception('Unknown device type: $deviceType');
+      // throw Exception('Unknown device type: $deviceType');
     }
 
     HomeDevice? h;
@@ -236,17 +224,15 @@ class HomeConnectApi {
 
   Future<void> putPowerState(
       String haId, String settingKey, Map<String, dynamic> payload) async {
-    final path = "$baseUrl/$haId/settings/$settingKey";
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
-    final headers = commonHeaders;
+    final path = "$haId/settings/$settingKey";
+    print("hello");
     final body = json.encode(payload);
-
+    print("payload $body");
     try {
-      final response = await http.put(uri, headers: headers, body: body);
-      if (response.statusCode != 204) {}
+      final response = await put(resource: path, body: body);
+      if (response.statusCode != 204) {
+        print("error: ${response.body}");
+      }
     } catch (e) {
       throw Exception("Error: $e");
     }
@@ -266,7 +252,7 @@ class HomeConnectApi {
       }
     });
 
-    final response = await put(resource: path, headers: headers, body: body);
+    final response = await put(resource: path, body: body);
     if (response.statusCode != 204) {
       throw Exception('Error starting program: ${response.body}');
     }
@@ -421,5 +407,14 @@ class HomeConnectApi {
     } else {
       throw Exception('Failed to get access token');
     }
+  }
+
+  Future<HomeConnectAuthCredentials?> checkTokenIntegrity() async {
+    if (await shouldRefreshToken()) {
+      await refreshToken();
+    }
+
+    final userCredentials = await storage.getCredentials();
+    return userCredentials;
   }
 }
