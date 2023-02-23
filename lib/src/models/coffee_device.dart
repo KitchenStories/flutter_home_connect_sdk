@@ -38,13 +38,13 @@ class CoffeeDevice extends HomeDevice {
   }
 
   @override
-  void startProgram(
-      {String? programKey, required List<DeviceOptions> options}) {
-    // TODO: implement startProgram
+  void stopProgram() {
+    // TODO: implement stopProgram
   }
 
   @override
-  void stopProgram() {
-    // TODO: implement stopProgram
+  void startProgram(
+      {String? programKey, required List<DeviceOptions> options}) {
+    // TODO: implement startProgram
   }
 }

@@ -102,17 +102,18 @@ class DeviceOven extends HomeDevice {
   }
 
   @override
-  void startProgram(
-      {String? programKey, required List<DeviceOptions> options}) {
+  Future<void> startProgram(
+      {String? programKey, required List<DeviceOptions> options}) async {
     programKey ??= selectedProgram.key;
     if (programKey.isEmpty) {
       throw Exception("No program selected");
     }
     try {
-      api.startProgram(
+      print(api);
+      await api.startProgram(
           haid: info.haId, programKey: programKey, options: options);
     } catch (e) {
-      throw Exception("Something went wrong: $e");
+      throw Exception("Something went wrong: $e, $options, $programKey");
     }
   }
 

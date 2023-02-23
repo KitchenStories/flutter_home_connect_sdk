@@ -2,9 +2,28 @@ import 'dart:convert';
 
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
+import 'package:http/testing.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
+
+class MyMockClass extends Mock implements MyClass {}
+
+class MockitoClient extends Mock implements http.Client {}
+
+class MockHomeConnectApi extends Mock implements HomeConnectApi {
+  @override
+  Future<void> startProgram(
+      {required String haid,
+      required String programKey,
+      required List<DeviceOptions> options}) async {
+    super.noSuchMethod(
+        Invocation.method(#startProgram, [haid, options, programKey]),
+        returnValue: Future.value());
+  }
+}
+
+class MyClass {}
 
 class TestAuthenticator extends HomeConnectAuth {
   String baseUrl;
@@ -59,7 +78,7 @@ class TestStorage extends MemoryHomeConnectAuthStorage {
 
 void main() {
   HomeConnectApi api = HomeConnectApi(
-    'example.com',
+    "https://example.com",
     credentials: HomeConnectClientCredentials(
       clientId: 'clientid',
       clientSecret: 'clientsecret',
@@ -73,7 +92,8 @@ void main() {
   ));
 
   final mockClient = MockClient((request) async {
-    if (request.url.path == "example.com/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
+    print(request.url.path);
+    if (request.url.path == "/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
       return http.Response('{"data": "oven-info"}', 204);
     }
     return http.Response('Not Found', 404);
@@ -208,6 +228,87 @@ void main() {
       expect(options.length, 1);
       expect(options[0].key, 'Cooking.Oven.Option.SetpointTemperature');
       expect(options[0].constraints, isA<OptionConstraints>());
+    });
+
+    test('startProgram should not work with empty key', () async {
+      final mockDevice = DeviceOven(
+          api,
+          DeviceInfo.fromJson(
+            {
+              "name": "Oven Simulator",
+              "brand": "BOSCH",
+              "vib": "HCS01OVN1",
+              "connected": true,
+              "type": "Oven",
+              "enumber": "HCS01OVN1/03",
+              "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB"
+            },
+          ),
+          [],
+          [],
+          []);
+
+      final mockClient = MockClient((request) async {
+        return http.Response('{}', 204);
+      });
+
+      api.client = mockClient;
+
+      // should throw an exception if no program key is provided
+      expect(
+          () async => mockDevice.startProgram(
+                programKey: '',
+                options: [
+                  DeviceOptions.fromJson(
+                    {
+                      "key": "Cooking.Oven.Option.SetpointTemperature",
+                      "value": 200,
+                      "unit": "°C",
+                    },
+                  )
+                ],
+              ),
+          throwsA(isA<Exception>()));
+    });
+
+    test('device.startProgram should call api.startProgram', () async {
+      final mockApi = MockHomeConnectApi();
+      final mockDevice = DeviceOven(
+          mockApi,
+          DeviceInfo.fromJson(
+            {
+              "name": "Oven Simulator",
+              "brand": "BOSCH",
+              "vib": "HCS01OVN1",
+              "connected": true,
+              "type": "Oven",
+              "enumber": "HCS01OVN1/03",
+              "haId": "haid"
+            },
+          ),
+          [],
+          [],
+          []);
+      final mockDeviceOptions = DeviceOptions.fromJson(
+        {
+          "key": "Cooking.Oven.Option.SetpointTemperature",
+          "value": 200,
+          "unit": "°C",
+        },
+      );
+      when(mockApi.startProgram(
+              haid: "haid",
+              programKey: "programKey",
+              options: [mockDeviceOptions]))
+          .thenAnswer((_) async => http.Response('{}', 204));
+
+      mockDevice
+          .startProgram(programKey: 'programKey', options: [mockDeviceOptions]);
+
+      verify(mockApi.startProgram(
+          haid: 'haid',
+          programKey: 'programKey',
+          options: [mockDeviceOptions])).called(1);
     });
   });
 }
