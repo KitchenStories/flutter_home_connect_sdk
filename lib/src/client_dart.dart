@@ -18,7 +18,7 @@ class HomeConnectApi {
   late http.Client client;
   String baseUrl;
   String _accessToken = '';
-  late final HomeDevice devices;
+  late final HomeDevice currentDevice;
   late StreamSubscription<Event> subscription;
 
   /// oauth client credentials
@@ -26,12 +26,7 @@ class HomeConnectApi {
   HomeConnectAuth? authenticator;
   HomeConnectAuthStorage storage = MemoryHomeConnectAuthStorage();
 
-  HomeConnectApi(
-    this.baseUrl, {
-    required this.credentials,
-    HomeConnectAuthStorage? storage,
-    this.authenticator,
-  }) {
+  HomeConnectApi(this.baseUrl, {required this.credentials, HomeConnectAuthStorage? storage, this.authenticator}) {
     client = http.Client();
 
     // set default storage
@@ -171,10 +166,11 @@ class HomeConnectApi {
 
   /// Returns the specific type of device with its programs and status.
   ///
+  /// For convenience, the returned device is also stored in the currentDevice property.
   /// This method should be used after getDevices() to get the specific type of device.
   /// Internally it calls getPrograms() and getStatus().
   /// The returned device will be of the specific type. For example, if the device is an oven,
-  ///  the returned device will be of type DeviceOven.
+  /// the returned device will be of type DeviceOven.
   Future<HomeDevice> getDevice(HomeDevice device) async {
     final devicePrograms = await getPrograms(haId: device.info.haId);
     final statResponse = await getStatus(device.info.haId);
@@ -183,6 +179,7 @@ class HomeConnectApi {
       case DeviceType.oven:
         device.programs = devicePrograms;
         device.status = statResponse;
+        currentDevice = device;
         return device;
 
       case DeviceType.dryer:
@@ -276,7 +273,7 @@ class HomeConnectApi {
   }
 
   Future<List<DeviceOptions>> getSelectedProgramOptions({String? haId}) async {
-    String deviceHaId = haId ?? devices.info.haId;
+    String deviceHaId = haId ?? currentDevice.info.haId;
     String path = "$deviceHaId/programs/selected";
     var res = await get(path);
     var data = json.decode(res.body);
@@ -286,17 +283,16 @@ class HomeConnectApi {
     return options;
   }
 
+  /// Selects a program for the device.
+  ///
+  /// If no haId is provided, the haId is taken from the current device.
+  /// Trhows an exception if the program could not be selected.
   Future<void> selectProgram({
     String? haid,
     required String programKey,
   }) async {
-    String deviceHaId = haid ?? devices.info.haId;
-    final path = "$baseUrl/$deviceHaId/programs/selected";
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
-    final headers = commonHeaders;
+    String deviceHaId = haid ?? currentDevice.info.haId;
+    final path = "$deviceHaId/programs/selected";
     final body = json.encode({
       'data': {
         'key': programKey,
@@ -304,7 +300,7 @@ class HomeConnectApi {
     });
 
     try {
-      final response = await http.put(uri, headers: headers, body: body);
+      final response = await put(resource: path, body: body);
       if (response.statusCode == 204) {
         print("Program selected successfully: $programKey");
       }
@@ -331,7 +327,7 @@ class HomeConnectApi {
   }
 
   Future<List<DeviceProgram>> getPrograms({String? haId}) async {
-    String deviceHaid = haId ?? devices.info.haId;
+    String deviceHaid = haId ?? currentDevice.info.haId;
 
     String path = "$deviceHaid/programs/available";
     final res = await get(path);
