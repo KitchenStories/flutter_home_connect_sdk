@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:core';
+
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:flutter_home_connect_sdk/src/models/coffee_device.dart';
@@ -10,11 +12,13 @@ import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
 import 'package:flutter_home_connect_sdk/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
+import './utils/uri.dart';
+
 class HomeConnectApi {
   late http.Client client;
   String baseUrl;
   String _accessToken = '';
-  late final HomeDevice devices;
+  late final HomeDevice currentDevice;
   late StreamSubscription<Event> subscription;
 
   /// oauth client credentials
@@ -22,12 +26,7 @@ class HomeConnectApi {
   HomeConnectAuth? authenticator;
   HomeConnectAuthStorage storage = MemoryHomeConnectAuthStorage();
 
-  HomeConnectApi(
-    this.baseUrl, {
-    required this.credentials,
-    HomeConnectAuthStorage? storage,
-    this.authenticator,
-  }) {
+  HomeConnectApi(this.baseUrl, {required this.credentials, HomeConnectAuthStorage? storage, this.authenticator}) {
     client = http.Client();
 
     // set default storage
@@ -36,15 +35,11 @@ class HomeConnectApi {
     }
   }
 
-  void setAuthenticator(HomeConnectAuth authenticator) {
-    this.authenticator = authenticator;
-  }
-
   Future<void> authenticate() async {
     if (authenticator == null) {
       throw Exception('No authenticator provided');
     }
-    final token = await authenticator!.authorize(credentials);
+    final token = await authenticator!.authorize(baseUrl, credentials);
     storage.setCredentials(token);
   }
 
@@ -61,7 +56,7 @@ class HomeConnectApi {
       throw Exception('No authenticator provided');
     }
     final userCredentials = await storage.getCredentials();
-    final tokens = await authenticator?.refresh(userCredentials!.refreshToken);
+    final tokens = await authenticator?.refresh(baseUrl, userCredentials!.refreshToken);
     if (tokens == null) {
       throw Exception('Failed to refresh token');
     }
@@ -69,15 +64,10 @@ class HomeConnectApi {
     await storage.setCredentials(tokens);
   }
 
-  Future<http.Response> put(
-      {required String resource, required String body}) async {
+  Future<http.Response> put({required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    var path = '$baseUrl/$resource';
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
+    final uri = Uri.parse(baseUrl).join('/api/homeappliances/$resource');
     final response = await client.put(uri, headers: commonHeaders, body: body);
     return response;
   }
@@ -85,11 +75,7 @@ class HomeConnectApi {
   Future<http.Response> get(String resource) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    var path = '$baseUrl/$resource';
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
+    final uri = Uri.parse(baseUrl).join('/api/homeappliances/$resource');
     final response = await client.get(
       uri,
       headers: commonHeaders,
@@ -111,8 +97,6 @@ class HomeConnectApi {
       final List<dynamic> devices = data['data']['homeappliances'];
       final result = <HomeDevice>[];
       for (final device in devices) {
-        // final settings = await getSettings(haId);
-        // final status = await getStatus(haId);
         final deviceType = device['type'];
         switch (deviceType) {
           case 'Oven':
@@ -182,10 +166,11 @@ class HomeConnectApi {
 
   /// Returns the specific type of device with its programs and status.
   ///
+  /// For convenience, the returned device is also stored in the currentDevice property.
   /// This method should be used after getDevices() to get the specific type of device.
   /// Internally it calls getPrograms() and getStatus().
   /// The returned device will be of the specific type. For example, if the device is an oven,
-  ///  the returned device will be of type DeviceOven.
+  /// the returned device will be of type DeviceOven.
   Future<HomeDevice> getDevice(HomeDevice device) async {
     final devicePrograms = await getPrograms(haId: device.info.haId);
     final statResponse = await getStatus(device.info.haId);
@@ -194,6 +179,7 @@ class HomeConnectApi {
       case DeviceType.oven:
         device.programs = devicePrograms;
         device.status = statResponse;
+        currentDevice = device;
         return device;
 
       case DeviceType.dryer:
@@ -219,8 +205,7 @@ class HomeConnectApi {
     return h!;
   }
 
-  Future<void> putPowerState(
-      String haId, String settingKey, Map<String, dynamic> payload) async {
+  Future<void> putPowerState(String haId, String settingKey, Map<String, dynamic> payload) async {
     final path = "$haId/settings/$settingKey";
     final body = json.encode(payload);
     try {
@@ -234,16 +219,11 @@ class HomeConnectApi {
   }
 
   Future<void> startProgram(
-      {required String haid,
-      required String programKey,
-      required List<DeviceOptions> options}) async {
+      {required String haid, required String programKey, required List<DeviceOptions> options}) async {
     final path = "$haid/programs/active";
 
     final body = json.encode({
-      'data': {
-        'key': programKey,
-        'options': options.map((e) => compact(e.toJson())).toList()
-      }
+      'data': {'key': programKey, 'options': options.map((e) => compact(e.toJson())).toList()}
     });
 
     final response = await put(resource: path, body: body);
@@ -253,11 +233,7 @@ class HomeConnectApi {
   }
 
   Future<void> stopProgram({required String haid}) async {
-    final path = "$baseUrl/$haid/programs/active";
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
+    final uri = Uri.parse(baseUrl).join('/api/homeappliances/$haid/programs/active');
     final headers = commonHeaders;
 
     try {
@@ -286,43 +262,37 @@ class HomeConnectApi {
     });
   }
 
-  Future<List<DeviceOptions>> getProgramOptionsConstraints(
-      {required String haId, required String programKey}) async {
+  Future<List<DeviceOptions>> getProgramOptionsConstraints({required String haId, required String programKey}) async {
     String path = "$haId/programs/available/$programKey";
     var res = await get(path);
     var data = json.decode(res.body);
     // Each program contains a list of options so we need to loop through each
     // option and then we create a DeviceOption object from the payload
-    List<DeviceOptions> options = (data['data']['options'] as List)
-        .map((e) => DeviceOptions.fromJson(e))
-        .toList();
+    List<DeviceOptions> options = (data['data']['options'] as List).map((e) => DeviceOptions.fromJson(e)).toList();
     return options;
   }
 
   Future<List<DeviceOptions>> getSelectedProgramOptions({String? haId}) async {
-    String deviceHaId = haId ?? devices.info.haId;
+    String deviceHaId = haId ?? currentDevice.info.haId;
     String path = "$deviceHaId/programs/selected";
     var res = await get(path);
     var data = json.decode(res.body);
     // Each program contains a list of options so we need to loop through each
     // option and then we create a DeviceOption object from the payload
-    List<DeviceOptions> options = (data['data']['options'] as List)
-        .map((e) => DeviceOptions.fromJson(e))
-        .toList();
+    List<DeviceOptions> options = (data['data']['options'] as List).map((e) => DeviceOptions.fromJson(e)).toList();
     return options;
   }
 
+  /// Selects a program for the device.
+  ///
+  /// If no haId is provided, the haId is taken from the current device.
+  /// Trhows an exception if the program could not be selected.
   Future<void> selectProgram({
     String? haid,
     required String programKey,
   }) async {
-    String deviceHaId = haid ?? devices.info.haId;
-    final path = "$baseUrl/$deviceHaId/programs/selected";
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
-    final headers = commonHeaders;
+    String deviceHaId = haid ?? currentDevice.info.haId;
+    final path = "$deviceHaId/programs/selected";
     final body = json.encode({
       'data': {
         'key': programKey,
@@ -330,7 +300,7 @@ class HomeConnectApi {
     });
 
     try {
-      final response = await http.put(uri, headers: headers, body: body);
+      final response = await put(resource: path, body: body);
       if (response.statusCode == 204) {
         print("Program selected successfully: $programKey");
       }
@@ -344,38 +314,25 @@ class HomeConnectApi {
       "data": {
         "status": [
           {"key": "BSH.Common.Status.RemoteControlActive", "value": 'true'},
-          {
-            "key": "BSH.Common.Status.RemoteControlStartAllowed",
-            "value": 'true'
-          },
-          {
-            "key": "BSH.Common.Status.OperationState",
-            "value": "BSH.Common.EnumType.OperationState.Ready"
-          },
-          {
-            "key": "BSH.Common.Status.DoorState",
-            "value": "BSH.Common.EnumType.DoorState.Closed"
-          },
+          {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": 'true'},
+          {"key": "BSH.Common.Status.OperationState", "value": "BSH.Common.EnumType.OperationState.Ready"},
+          {"key": "BSH.Common.Status.DoorState", "value": "BSH.Common.EnumType.DoorState.Closed"},
           {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": '20'}
         ]
       }
     };
-    List<DeviceStatus> stList = (statResponse['data']['status'] as List)
-        .map((e) => DeviceStatus.fromJson(e))
-        .toList();
+    List<DeviceStatus> stList = (statResponse['data']['status'] as List).map((e) => DeviceStatus.fromJson(e)).toList();
     var response = Future.delayed(Duration(seconds: 1), () => stList);
     return response;
   }
 
   Future<List<DeviceProgram>> getPrograms({String? haId}) async {
-    String deviceHaid = haId ?? devices.info.haId;
+    String deviceHaid = haId ?? currentDevice.info.haId;
 
     String path = "$deviceHaid/programs/available";
     final res = await get(path);
     final List<DeviceProgram> programs =
-        (json.decode(res.body)['data']['programs'] as List)
-            .map((e) => DeviceProgram.fromJson(e))
-            .toList();
+        (json.decode(res.body)['data']['programs'] as List).map((e) => DeviceProgram.fromJson(e)).toList();
     return programs;
   }
 
@@ -397,6 +354,7 @@ class HomeConnectApi {
       return HomeConnectAuthCredentials(
         accessToken: jsonResponse['access_token'],
         refreshToken: jsonResponse['refresh_token'],
+        expirationDate: DateTime.now().add(Duration(seconds: jsonResponse['expires_in'])),
       );
     } else {
       throw Exception('Failed to get access token');
