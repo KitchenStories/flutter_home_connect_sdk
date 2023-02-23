@@ -11,15 +11,16 @@ class TestAuthenticator extends HomeConnectAuth {
   });
 
   @override
-  Future<HomeConnectAuthCredentials> authorize(HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 
   @override
-  Future<HomeConnectAuthCredentials> refresh(String refreshToken) async {
+  Future<HomeConnectAuthCredentials> refresh(String baseUrl, String refreshToken) async {
     return HomeConnectAuthCredentials(
       accessToken: "refreshed",
       refreshToken: "refreshed_token",
+      expirationDate: DateTime.now().add(Duration(seconds: 1000)),
     );
   }
 }
@@ -28,6 +29,7 @@ class TestCredentials extends HomeConnectAuthCredentials {
   TestCredentials({
     required super.accessToken,
     required super.refreshToken,
+    required super.expirationDate,
   });
 
   @override
@@ -68,6 +70,7 @@ void main() {
   api.storage.setCredentials(TestCredentials(
       accessToken: "test_token",
       refreshToken: "test_refresh_token",
+      expirationDate: DateTime.now().add(Duration(seconds: 1000)),
   ));
 
   final mockClient = MockClient((request) async {

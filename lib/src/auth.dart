@@ -1,12 +1,22 @@
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+import 'package:oauth2/oauth2.dart' as oauth2;
+
+import './models/payloads/oauth_token.dart';
+
+// load join extension
+import './utils/uri.dart';
+
 class HomeConnectAuthCredentials {
   final String accessToken;
   final String refreshToken;
+  final DateTime expirationDate;
 
   HomeConnectAuthCredentials({
     required this.accessToken,
     required this.refreshToken,
+    required this.expirationDate,
   });
 
   Map<String, dynamic> parseJwt(String token) {
@@ -77,8 +87,54 @@ class HomeConnectClientCredentials {
 }
 
 abstract class HomeConnectAuth {
-  Future<HomeConnectAuthCredentials> authorize(HomeConnectClientCredentials credentials);
-  Future<HomeConnectAuthCredentials> refresh(String refreshToken);
+  Uri getCodeGrant(String baseUrl, HomeConnectClientCredentials credentials) {
+    final grant = oauth2.AuthorizationCodeGrant(
+      credentials.clientId,
+      Uri.parse(baseUrl).join('/security/oauth/authorize'),
+      Uri.parse(baseUrl).join('/security/oauth/token'),
+      secret: credentials.clientSecret,
+    );
+    return grant.getAuthorizationUrl(Uri.parse(credentials.redirectUri));
+  }
+
+  Future<HomeConnectAuthCredentials> exchangeCode(
+      String baseUrl, HomeConnectClientCredentials credentials, String code) async {
+    final tokenResponse = await http.post(
+      Uri.parse(baseUrl).join('/security/oauth/token'),
+      body: {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'client_id': credentials.clientId,
+        'redirect_uri': credentials.redirectUri,
+      },
+    );
+
+    final res = OauthTokenResponsePayload.fromJson(json.decode(tokenResponse.body));
+    return HomeConnectAuthCredentials(
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+      expirationDate: DateTime.now().add(Duration(seconds: res.expiresIn)),
+    );
+  }
+
+  Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials);
+  Future<HomeConnectAuthCredentials> refresh(String baseUrl, String refreshToken) async {
+    final res = await http.post(Uri.parse(baseUrl).join("security/oauth/token"), body: {
+      'grant_type': 'refresh_token',
+      'refresh_token': refreshToken,
+    });
+    if (res.statusCode != 200) {
+      print(res.body);
+      print(Uri.parse(baseUrl).join("security/oauth/token"));
+      throw Exception('Failed to refresh token');
+    }
+    final tokenRes = OauthTokenResponsePayload.fromJson(json.decode(res.body));
+    return HomeConnectAuthCredentials(
+      accessToken: tokenRes.accessToken,
+      refreshToken: tokenRes.refreshToken,
+      expirationDate: DateTime.now().add(Duration(seconds: tokenRes.expiresIn)),
+    );
+  }
 }
 
 abstract class HomeConnectAuthStorage {
