@@ -80,7 +80,7 @@ void main() {
       return http.Response('{"error": "Bad Request"}', 400);
     } else if (request.url.path == "/no-content") {
       return http.Response('', 204);
-    } else if (request.url.path == "example.com/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
+    } else if (request.url.path == "/api/homeappliances/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
       return http.Response('{"data": "oven-info"}', 204);
     }
     return http.Response('Not Found', 404);

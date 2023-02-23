@@ -102,8 +102,6 @@ class HomeConnectApi {
       final List<dynamic> devices = data['data']['homeappliances'];
       final result = <HomeDevice>[];
       for (final device in devices) {
-        // final settings = await getSettings(haId);
-        // final status = await getStatus(haId);
         final deviceType = device['type'];
         switch (deviceType) {
           case 'Oven':
