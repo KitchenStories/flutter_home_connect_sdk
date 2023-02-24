@@ -27,12 +27,12 @@ class TestAuthenticator extends HomeConnectAuth {
   TestAuthenticator({this.baseUrl = 'https://simulator.home-connect.com/'});
 
   @override
-  Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(Uri baseUrl, HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 
   @override
-  Future<HomeConnectAuthCredentials> refresh(String baseUrl, String refreshToken) async {
+  Future<HomeConnectAuthCredentials> refresh(Uri baseUrl, String refreshToken) async {
     return HomeConnectAuthCredentials(
       accessToken: "refreshed",
       refreshToken: "refreshed_token",
@@ -75,7 +75,7 @@ class TestStorage extends MemoryHomeConnectAuthStorage {
 
 void main() {
   HomeConnectApi api = HomeConnectApi(
-    "https://example.com",
+    Uri.parse("https://example.com"),
     credentials: HomeConnectClientCredentials(
       clientId: 'clientid',
       clientSecret: 'clientsecret',

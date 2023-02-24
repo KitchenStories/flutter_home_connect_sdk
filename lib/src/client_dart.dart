@@ -16,7 +16,7 @@ import './utils/uri.dart';
 
 class HomeConnectApi {
   late http.Client client;
-  String baseUrl;
+  Uri baseUrl;
   String _accessToken = '';
   late final HomeDevice currentDevice;
   late StreamSubscription<Event> subscription;
@@ -67,7 +67,7 @@ class HomeConnectApi {
   Future<http.Response> put({required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    final uri = Uri.parse(baseUrl).join('/api/homeappliances/$resource');
+    final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.put(uri, headers: commonHeaders, body: body);
     return response;
   }
@@ -75,7 +75,7 @@ class HomeConnectApi {
   Future<http.Response> get(String resource) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    final uri = Uri.parse(baseUrl).join('/api/homeappliances/$resource');
+    final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.get(
       uri,
       headers: commonHeaders,
@@ -233,7 +233,7 @@ class HomeConnectApi {
   }
 
   Future<void> stopProgram({required String haid}) async {
-    final uri = Uri.parse(baseUrl).join('/api/homeappliances/$haid/programs/active');
+    final uri = baseUrl.join('/api/homeappliances/$haid/programs/active');
     final headers = commonHeaders;
 
     try {
@@ -245,11 +245,7 @@ class HomeConnectApi {
   }
 
   Future<void> startListening(String haid, Function callback) async {
-    final path = "$baseUrl/$haid/events";
-    final uri = Uri.tryParse(path);
-    if (uri == null) {
-      throw Exception('Invalid URI: $path');
-    }
+    final uri = baseUrl.join("$haid/events");
     final headers = commonHeaders;
 
     EventSource eventSource = await EventSource.connect(
