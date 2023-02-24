@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
+import 'package:test/test.dart';
 
 class MyMockClass extends Mock implements MyClass {}
 

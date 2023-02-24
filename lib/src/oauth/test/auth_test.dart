@@ -1,5 +1,5 @@
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
-import 'package:flutter_home_connect_sdk/src/models/oauth/oauth_token.dart';
+import 'package:flutter_home_connect_sdk/src/oauth/oauth_token.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
