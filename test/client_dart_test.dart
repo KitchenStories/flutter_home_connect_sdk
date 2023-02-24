@@ -138,16 +138,6 @@ void main() {
               "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB",
               "enumber": "HCS01OVN1/03",
               "connected": true,
-            },
-            {
-              "type": "Washer",
-              "id": "2",
-              "name": "Washer Simulator",
-              "brand": "BOSCH",
-              "vib": "HCS01WAS1",
-              "haId": "BOSCH-HCS01WAS1-54E7EF9DEDBB",
-              "enumber": "HCS01WAS1/03",
-              "connected": true,
             }
           ]
         }
@@ -161,9 +151,8 @@ void main() {
 
       final devices = await api.getDevices();
 
-      expect(devices.length, 2);
+      expect(devices.length, 1);
       expect(devices[0], isA<DeviceOven>());
-      expect(devices[1], isA<WasherDevice>());
     });
 
     test('getPrograms should return a list of DeviceProgram ', () async {
@@ -215,7 +204,8 @@ void main() {
 
       api.client = mockClient;
 
-      List<DeviceOptions> options = await api.getProgramOptions(haId: 'validDeviceHaId', programKey: 'validProgramKey');
+      List<ProgramOptions> options =
+          await api.getProgramOptions(haId: 'validDeviceHaId', programKey: 'validProgramKey');
 
       expect(options.length, 1);
       expect(options[0].key, 'Cooking.Oven.Option.SetpointTemperature');
@@ -251,7 +241,7 @@ void main() {
           () async => mockDevice.startProgram(
                 programKey: '',
                 options: [
-                  DeviceOptions.fromJson(
+                  ProgramOptions.fromJson(
                     {
                       "key": "Cooking.Oven.Option.SetpointTemperature",
                       "value": 200,
