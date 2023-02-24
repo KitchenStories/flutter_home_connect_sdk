@@ -87,20 +87,20 @@ class HomeConnectClientCredentials {
 }
 
 abstract class HomeConnectAuth {
-  Uri getCodeGrant(String baseUrl, HomeConnectClientCredentials credentials) {
+  Uri getCodeGrant(Uri baseUrl, HomeConnectClientCredentials credentials) {
     final grant = oauth2.AuthorizationCodeGrant(
       credentials.clientId,
-      Uri.parse(baseUrl).join('/security/oauth/authorize'),
-      Uri.parse(baseUrl).join('/security/oauth/token'),
+      baseUrl.join('/security/oauth/authorize'),
+      baseUrl.join('/security/oauth/token'),
       secret: credentials.clientSecret,
     );
     return grant.getAuthorizationUrl(Uri.parse(credentials.redirectUri));
   }
 
   Future<HomeConnectAuthCredentials> exchangeCode(
-      String baseUrl, HomeConnectClientCredentials credentials, String code) async {
+      Uri baseUrl, HomeConnectClientCredentials credentials, String code) async {
     final tokenResponse = await http.post(
-      Uri.parse(baseUrl).join('/security/oauth/token'),
+      baseUrl.join('/security/oauth/token'),
       body: {
         'grant_type': 'authorization_code',
         'code': code,
@@ -117,15 +117,13 @@ abstract class HomeConnectAuth {
     );
   }
 
-  Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials);
-  Future<HomeConnectAuthCredentials> refresh(String baseUrl, String refreshToken) async {
-    final res = await http.post(Uri.parse(baseUrl).join("security/oauth/token"), body: {
+  Future<HomeConnectAuthCredentials> authorize(Uri baseUrl, HomeConnectClientCredentials credentials);
+  Future<HomeConnectAuthCredentials> refresh(Uri baseUrl, String refreshToken) async {
+    final res = await http.post(baseUrl.join("security/oauth/token"), body: {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,
     });
     if (res.statusCode != 200) {
-      print(res.body);
-      print(Uri.parse(baseUrl).join("security/oauth/token"));
       throw Exception('Failed to refresh token');
     }
     final tokenRes = OauthTokenResponsePayload.fromJson(json.decode(res.body));

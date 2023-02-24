@@ -6,14 +6,14 @@ const refreshToken = "Your refresh token";
 class SandboxAuthorizer extends HomeConnectAuth {
   @override
   Future<HomeConnectAuthCredentials> authorize(
-    String baseUrl, HomeConnectClientCredentials credentials) {
+    Uri baseUrl, HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 }
 
 void main() async {
   HomeConnectApi api = HomeConnectApi(
-    'https://simulator.home-connect.com/',
+    Uri.parse('https://simulator.home-connect.com/'),
     credentials: HomeConnectClientCredentials(
       clientId: 'Your client id',
       clientSecret: 'Your client secret',
