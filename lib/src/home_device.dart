@@ -48,6 +48,9 @@ abstract class HomeDevice {
 
   void updateStatusFromEvent(Event event);
 
+  /// Selects a program to run on the selected home appliance
+  /// [programKey] - the key of the program to select
+  /// Trhows generic exception if the request fails.
   Future<void> selectProgram({required String programKey});
 
   /// Gets the list of programs available for the selected home appliance
