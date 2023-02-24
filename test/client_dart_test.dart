@@ -14,12 +14,8 @@ class MockitoClient extends Mock implements http.Client {}
 class MockHomeConnectApi extends Mock implements HomeConnectApi {
   @override
   Future<void> startProgram(
-      {required String haid,
-      required String programKey,
-      required List<DeviceOptions> options}) async {
-    super.noSuchMethod(
-        Invocation.method(#startProgram, [haid, options, programKey]),
-        returnValue: Future.value());
+      {required String haid, required String programKey, required List<DeviceOptions> options}) async {
+    super.noSuchMethod(Invocation.method(#startProgram, [haid, options, programKey]), returnValue: Future.value());
   }
 }
 
@@ -31,16 +27,16 @@ class TestAuthenticator extends HomeConnectAuth {
   TestAuthenticator({this.baseUrl = 'https://simulator.home-connect.com/'});
 
   @override
-  Future<HomeConnectAuthCredentials> authorize(
-      HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 
   @override
-  Future<HomeConnectAuthCredentials> refresh(String refreshToken) async {
+  Future<HomeConnectAuthCredentials> refresh(String baseUrl, String refreshToken) async {
     return HomeConnectAuthCredentials(
       accessToken: "refreshed",
       refreshToken: "refreshed_token",
+      expirationDate: DateTime.now().add(Duration(seconds: 1000)),
     );
   }
 }
@@ -49,6 +45,7 @@ class TestCredentials extends HomeConnectAuthCredentials {
   TestCredentials({
     required super.accessToken,
     required super.refreshToken,
+    required super.expirationDate,
   });
 
   @override
@@ -89,11 +86,12 @@ void main() {
   api.storage.setCredentials(TestCredentials(
     accessToken: "test_token",
     refreshToken: "test_refresh_token",
+    expirationDate: DateTime.now().add(Duration(seconds: 1000)),
   ));
 
   final mockClient = MockClient((request) async {
     print(request.url.path);
-    if (request.url.path == "/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
+    if (request.url.path == "/api/homeappliances/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
       return http.Response('{"data": "oven-info"}', 204);
     }
     return http.Response('Not Found', 404);
@@ -189,18 +187,14 @@ void main() {
 
       api.client = mockClient;
 
-      List<DeviceProgram> programs =
-          await api.getPrograms(haId: 'validDeviceHaId');
+      List<DeviceProgram> programs = await api.getPrograms(haId: 'validDeviceHaId');
 
       expect(programs.length, 2);
       expect(programs[0].key, 'Cooking.Oven.Program.HeatingMode.HotAir');
-      expect(
-          programs[1].key, 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+      expect(programs[1].key, 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
     });
 
-    test(
-        'getProgramOptions should return a DeviceOptions list and a constraint object',
-        () async {
+    test('getProgramOptions should return a DeviceOptions list and a constraint object', () async {
       final mockResponseBody = {
         "data": {
           "options": [
@@ -222,8 +216,7 @@ void main() {
 
       api.client = mockClient;
 
-      List<DeviceOptions> options = await api.getProgramOptions(
-          haId: 'validDeviceHaId', programKey: 'validProgramKey');
+      List<DeviceOptions> options = await api.getProgramOptions(haId: 'validDeviceHaId', programKey: 'validProgramKey');
 
       expect(options.length, 1);
       expect(options[0].key, 'Cooking.Oven.Option.SetpointTemperature');
@@ -296,19 +289,12 @@ void main() {
           "unit": "°C",
         },
       );
-      when(mockApi.startProgram(
-              haid: "haid",
-              programKey: "programKey",
-              options: [mockDeviceOptions]))
+      when(mockApi.startProgram(haid: "haid", programKey: "programKey", options: [mockDeviceOptions]))
           .thenAnswer((_) async => http.Response('{}', 204));
 
-      mockDevice
-          .startProgram(programKey: 'programKey', options: [mockDeviceOptions]);
+      mockDevice.startProgram(programKey: 'programKey', options: [mockDeviceOptions]);
 
-      verify(mockApi.startProgram(
-          haid: 'haid',
-          programKey: 'programKey',
-          options: [mockDeviceOptions])).called(1);
+      verify(mockApi.startProgram(haid: 'haid', programKey: 'programKey', options: [mockDeviceOptions])).called(1);
     });
   });
 }
