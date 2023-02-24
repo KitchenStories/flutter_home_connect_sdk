@@ -10,7 +10,7 @@ DeviceProgram _$DeviceProgramFromJson(Map<String, dynamic> json) =>
     DeviceProgram(
       json['key'] as String,
       (json['options'] as List<dynamic>)
-          .map((e) => DeviceOptions.fromJson(e as Map<String, dynamic>))
+          .map((e) => ProgramOptions.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

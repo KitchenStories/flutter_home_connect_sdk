@@ -5,8 +5,7 @@ const refreshToken = "Your refresh token";
 
 class SandboxAuthorizer extends HomeConnectAuth {
   @override
-  Future<HomeConnectAuthCredentials> authorize(
-    String baseUrl, HomeConnectClientCredentials credentials) {
+  Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials) {
     throw UnimplementedError();
   }
 }
@@ -28,19 +27,16 @@ void main() async {
     expirationDate: DateTime.now().add(Duration(days: 1)),
   ));
 
-  // print("init $api");
   final res = await api.getDevices();
-  var selectedDevice =
-      res.firstWhere((element) => element.info.type == DeviceType.oven);
-  selectedDevice = await api.getDevice(selectedDevice);
+  var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
+  await selectedDevice.init();
   await selectedDevice.getPrograms();
 
   print(selectedDevice.info.haId);
   selectedDevice.programs.toList().forEach((element) {
     print(element.key);
   });
-  await selectedDevice.selectProgram(
-      programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+  await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
 
   print(selectedDevice.selectedProgram.options);
   for (var element in selectedDevice.selectedProgram.options) {
@@ -48,10 +44,8 @@ void main() async {
     print(element.unit);
   }
 
-  final option1 = DeviceOptions.toCommandPayload(
-      key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
-  final option2 = DeviceOptions.toCommandPayload(
-      key: 'BSH.Common.Option.Duration', value: 500);
+  final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
+  final option2 = ProgramOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
 
   selectedDevice.startProgram(options: [option1, option2]);
 

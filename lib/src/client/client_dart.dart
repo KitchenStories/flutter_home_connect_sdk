@@ -4,21 +4,15 @@ import 'dart:core';
 
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
-import 'package:flutter_home_connect_sdk/src/models/coffee_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/dishwasher_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/dryer_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/fridge_freezer_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
 import 'package:flutter_home_connect_sdk/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
-import './utils/uri.dart';
+import '../utils/uri.dart';
 
 class HomeConnectApi {
   late http.Client client;
   String baseUrl;
   String _accessToken = '';
-  late final HomeDevice currentDevice;
   late StreamSubscription<Event> subscription;
 
   /// oauth client credentials
@@ -104,56 +98,56 @@ class HomeConnectApi {
             result.add(DeviceOven.fromInfoPayload(this, info));
 
             break;
-          case 'Dryer':
-            DryerDevice mock = DryerDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'Washer':
-            WasherDevice mock = WasherDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'Dishwasher':
-            DishwasherDevice mock = DishwasherDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'FridgeFreezer':
-            FridgeFreezerDevice mock = FridgeFreezerDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
-          case 'CoffeeMaker':
-            CoffeeDevice mock = CoffeeDevice(
-              this,
-              DeviceInfo.fromJson(device),
-              [],
-              [],
-              [],
-            );
-            result.add(mock);
-            break;
+          // case 'Dryer':
+          //   DryerDevice mock = DryerDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'Washer':
+          //   WasherDevice mock = WasherDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'Dishwasher':
+          //   DishwasherDevice mock = DishwasherDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'FridgeFreezer':
+          //   FridgeFreezerDevice mock = FridgeFreezerDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
+          // case 'CoffeeMaker':
+          //   CoffeeDevice mock = CoffeeDevice(
+          //     this,
+          //     DeviceInfo.fromJson(device),
+          //     [],
+          //     [],
+          //     [],
+          //   );
+          //   result.add(mock);
+          //   break;
           default:
           // throw Exception('Unknown device type: $deviceType');
         }
@@ -162,47 +156,6 @@ class HomeConnectApi {
     } else {
       throw Exception('Error getting devices: ${response.body}');
     }
-  }
-
-  /// Returns the specific type of device with its programs and status.
-  ///
-  /// For convenience, the returned device is also stored in the currentDevice property.
-  /// This method should be used after getDevices() to get the specific type of device.
-  /// Internally it calls getPrograms() and getStatus().
-  /// The returned device will be of the specific type. For example, if the device is an oven,
-  /// the returned device will be of type DeviceOven.
-  Future<HomeDevice> getDevice(HomeDevice device) async {
-    final devicePrograms = await getPrograms(haId: device.info.haId);
-    final statResponse = await getStatus(device.info.haId);
-    final deviceType = device.info.type;
-    switch (deviceType) {
-      case DeviceType.oven:
-        device.programs = devicePrograms;
-        device.status = statResponse;
-        currentDevice = device;
-        return device;
-
-      case DeviceType.dryer:
-        // result.add(DeviceDryer.fromPayload(this, device, settings, status));
-        break;
-      case DeviceType.washer:
-        // result.add(DeviceWasher.fromPayload(this, device, settings, status));
-        break;
-      case DeviceType.dishwasher:
-        // result.add(DeviceDishwasher.fromPayload(this, device, settings, status));
-        break;
-      case DeviceType.fridgeFreezer:
-        // result.add(DeviceFridgeFreezer.fromPayload(this, device, settings, status));
-        break;
-      case DeviceType.coffeeMaker:
-        // result.add(DeviceCoffeeMaker.fromPayload(this, device, settings, status));
-        break;
-      default:
-      // throw Exception('Unknown device type: $deviceType');
-    }
-
-    HomeDevice? h;
-    return h!;
   }
 
   Future<void> putPowerState(String haId, String settingKey, Map<String, dynamic> payload) async {
@@ -219,7 +172,7 @@ class HomeConnectApi {
   }
 
   Future<void> startProgram(
-      {required String haid, required String programKey, required List<DeviceOptions> options}) async {
+      {required String haid, required String programKey, required List<ProgramOptions> options}) async {
     final path = "$haid/programs/active";
 
     final body = json.encode({
@@ -262,24 +215,23 @@ class HomeConnectApi {
     });
   }
 
-  Future<List<DeviceOptions>> getProgramOptionsConstraints({required String haId, required String programKey}) async {
+  Future<List<ProgramOptions>> getProgramOptionsConstraints({required String haId, required String programKey}) async {
     String path = "$haId/programs/available/$programKey";
     var res = await get(path);
     var data = json.decode(res.body);
     // Each program contains a list of options so we need to loop through each
     // option and then we create a DeviceOption object from the payload
-    List<DeviceOptions> options = (data['data']['options'] as List).map((e) => DeviceOptions.fromJson(e)).toList();
+    List<ProgramOptions> options = (data['data']['options'] as List).map((e) => ProgramOptions.fromJson(e)).toList();
     return options;
   }
 
-  Future<List<DeviceOptions>> getSelectedProgramOptions({String? haId}) async {
-    String deviceHaId = haId ?? currentDevice.info.haId;
-    String path = "$deviceHaId/programs/selected";
+  Future<List<ProgramOptions>> getSelectedProgramOptions({required String haId}) async {
+    String path = "$haId/programs/selected";
     var res = await get(path);
     var data = json.decode(res.body);
     // Each program contains a list of options so we need to loop through each
     // option and then we create a DeviceOption object from the payload
-    List<DeviceOptions> options = (data['data']['options'] as List).map((e) => DeviceOptions.fromJson(e)).toList();
+    List<ProgramOptions> options = (data['data']['options'] as List).map((e) => ProgramOptions.fromJson(e)).toList();
     return options;
   }
 
@@ -287,12 +239,8 @@ class HomeConnectApi {
   ///
   /// If no haId is provided, the haId is taken from the current device.
   /// Trhows an exception if the program could not be selected.
-  Future<void> selectProgram({
-    String? haid,
-    required String programKey,
-  }) async {
-    String deviceHaId = haid ?? currentDevice.info.haId;
-    final path = "$deviceHaId/programs/selected";
+  Future<void> selectProgram({required String haId, required String programKey}) async {
+    final path = "$haId/programs/selected";
     final body = json.encode({
       'data': {
         'key': programKey,
@@ -309,7 +257,7 @@ class HomeConnectApi {
     }
   }
 
-  Future<List<DeviceStatus>> getStatus(String haId) {
+  Future<List<DeviceStatus>> getStatus({required String haId}) {
     Map<String, dynamic> statResponse = {
       "data": {
         "status": [
@@ -326,10 +274,8 @@ class HomeConnectApi {
     return response;
   }
 
-  Future<List<DeviceProgram>> getPrograms({String? haId}) async {
-    String deviceHaid = haId ?? currentDevice.info.haId;
-
-    String path = "$deviceHaid/programs/available";
+  Future<List<DeviceProgram>> getPrograms({required String haId}) async {
+    String path = "$haId/programs/available";
     final res = await get(path);
     final List<DeviceProgram> programs =
         (json.decode(res.body)['data']['programs'] as List).map((e) => DeviceProgram.fromJson(e)).toList();

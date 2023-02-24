@@ -1,12 +1,11 @@
 import 'dart:convert';
 
+import 'package:flutter_home_connect_sdk/src/models/oauth/oauth_token.dart';
 import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
 
-import './models/payloads/oauth_token.dart';
-
 // load join extension
-import './utils/uri.dart';
+import '../../utils/uri.dart';
 
 class HomeConnectAuthCredentials {
   final String accessToken;

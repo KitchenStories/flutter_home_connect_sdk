@@ -1,9 +1,9 @@
 import 'package:eventsource/eventsource.dart';
-import 'package:flutter_home_connect_sdk/src/client_dart.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_program.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
+import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
+import 'package:flutter_home_connect_sdk/src/models/info/device_info.dart';
+import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
+import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
+import 'package:flutter_home_connect_sdk/src/models/status/device_status.dart';
 
 enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishwasher }
 
@@ -24,13 +24,8 @@ abstract class HomeDevice {
   final HomeConnectApi api;
   final DeviceInfo info;
   late DeviceProgram selectedProgram;
-  List<DeviceOptions> options;
   List<DeviceStatus> status;
   List<DeviceProgram> programs;
-
-  addOption(DeviceOptions option) {
-    options.add(option);
-  }
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
@@ -39,7 +34,17 @@ abstract class HomeDevice {
   String get deviceName => info.name;
   String get deviceHaId => info.haId;
 
-  HomeDevice(this.api, this.info, this.options, this.status, this.programs);
+  HomeDevice(this.api, this.info, this.status, this.programs);
+
+  /// Initializes the device
+  ///
+  /// Sets the [status] and [programs] properties for this device
+  /// by calling the [getPrograms] and [getStatus] methods.
+  Future<HomeDevice> init() async {
+    programs = await api.getPrograms(haId: info.haId);
+    status = await api.getStatus(haId: info.haId);
+    return this;
+  }
 
   void updateStatusFromEvent(Event event);
 
@@ -62,7 +67,7 @@ abstract class HomeDevice {
   ///
   /// [options] - a list of options for the program, e.g. temperature, duration, etc.
   /// Trhows generic exception if the request fails.
-  void startProgram({String programKey, required List<DeviceOptions> options});
+  void startProgram({String programKey, required List<ProgramOptions> options});
 
   /// Stops the currently running program
   ///

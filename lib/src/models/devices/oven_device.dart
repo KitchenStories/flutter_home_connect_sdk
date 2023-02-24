@@ -1,26 +1,24 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:eventsource/eventsource.dart';
-import 'package:flutter_home_connect_sdk/src/client_dart.dart';
+import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/home_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_event.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_program.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_settings.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
+
+import 'package:flutter_home_connect_sdk/src/models/device_settings.dart';
+import 'package:flutter_home_connect_sdk/src/models/event/device_event.dart';
+import 'package:flutter_home_connect_sdk/src/models/info/device_info.dart';
+import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
+import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
+import 'package:flutter_home_connect_sdk/src/models/status/device_status.dart';
 
 class DeviceOven extends HomeDevice {
-  DeviceOven(HomeConnectApi api, DeviceInfo info, List<DeviceOptions> options,
-      List<DeviceStatus> status, List<DeviceProgram> programs)
-      : super(api, info, options, status, programs);
+  DeviceOven(HomeConnectApi api, DeviceInfo info, List<ProgramOptions> options, List<DeviceStatus> status,
+      List<DeviceProgram> programs)
+      : super(api, info, status, programs);
 
-  factory DeviceOven.fromPayload(
-      HomeConnectApi api,
-      DeviceInfo info,
-      List<DeviceOptions> options,
-      List<DeviceStatus> stats,
-      List<DeviceProgram> programs) {
+  factory DeviceOven.fromPayload(HomeConnectApi api, DeviceInfo info, List<ProgramOptions> options,
+      List<DeviceStatus> stats, List<DeviceProgram> programs) {
     return DeviceOven(api, info, options, stats, programs);
   }
 
@@ -52,11 +50,10 @@ class DeviceOven extends HomeDevice {
   @override
   Future<void> selectProgram({required String programKey}) async {
     try {
-      await api.selectProgram(haid: info.haId, programKey: programKey);
-      options = await api.getSelectedProgramOptions(haId: info.haId);
+      await api.selectProgram(haId: info.haId, programKey: programKey);
+      List<ProgramOptions> options = await api.getSelectedProgramOptions(haId: info.haId);
       selectedProgram = DeviceProgram(programKey, options);
-      final constraints = await api.getProgramOptionsConstraints(
-          haId: info.haId, programKey: programKey);
+      final constraints = await api.getProgramOptionsConstraints(haId: info.haId, programKey: programKey);
       for (var option in options) {
         for (var constraint in constraints) {
           if (option.key == constraint.key) {
@@ -102,15 +99,13 @@ class DeviceOven extends HomeDevice {
   }
 
   @override
-  void startProgram(
-      {String? programKey, required List<DeviceOptions> options}) {
+  void startProgram({String? programKey, required List<ProgramOptions> options}) {
     programKey ??= selectedProgram.key;
     if (programKey.isEmpty) {
       throw Exception("No program selected");
     }
     try {
-      api.startProgram(
-          haid: info.haId, programKey: programKey, options: options);
+      api.startProgram(haid: info.haId, programKey: programKey, options: options);
     } catch (e) {
       throw Exception("Something went wrong: $e");
     }

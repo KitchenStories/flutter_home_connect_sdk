@@ -1,21 +1,24 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'device_options.dart';
+part of 'program_options.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DeviceOptions _$DeviceOptionsFromJson(Map<String, dynamic> json) =>
-    DeviceOptions(
+ProgramOptions _$ProgramOptionsFromJson(Map<String, dynamic> json) =>
+    ProgramOptions(
       json['key'] as String,
       json['type'] as String?,
       json['unit'] as String?,
-      json['value'] as String?,
-      json['constraints'],
+      json['value'],
+      json['constraints'] == null
+          ? null
+          : OptionConstraints.fromJson(
+              json['constraints'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$DeviceOptionsToJson(DeviceOptions instance) =>
+Map<String, dynamic> _$ProgramOptionsToJson(ProgramOptions instance) =>
     <String, dynamic>{
       'key': instance.key,
       'type': instance.type,

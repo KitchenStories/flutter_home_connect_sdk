@@ -6,9 +6,7 @@ import 'package:http/testing.dart';
 class TestAuthenticator extends HomeConnectAuth {
   String baseUrl;
 
-  TestAuthenticator({
-    this.baseUrl = 'https://simulator.home-connect.com/'
-  });
+  TestAuthenticator({this.baseUrl = 'https://simulator.home-connect.com/'});
 
   @override
   Future<HomeConnectAuthCredentials> authorize(String baseUrl, HomeConnectClientCredentials credentials) {
@@ -68,9 +66,9 @@ void main() {
     authenticator: TestAuthenticator(),
   );
   api.storage.setCredentials(TestCredentials(
-      accessToken: "test_token",
-      refreshToken: "test_refresh_token",
-      expirationDate: DateTime.now().add(Duration(seconds: 1000)),
+    accessToken: "test_token",
+    refreshToken: "test_refresh_token",
+    expirationDate: DateTime.now().add(Duration(seconds: 1000)),
   ));
 
   final mockClient = MockClient((request) async {
