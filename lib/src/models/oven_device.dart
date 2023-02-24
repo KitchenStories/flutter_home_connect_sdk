@@ -55,8 +55,8 @@ class DeviceOven extends HomeDevice {
       await api.selectProgram(haid: info.haId, programKey: programKey);
       options = await api.getSelectedProgramOptions(haId: info.haId);
       selectedProgram = DeviceProgram(programKey, options);
-      final constraints = await api.getProgramOptionsConstraints(
-          haId: info.haId, programKey: programKey);
+      final constraints =
+          await api.getProgramOptions(haId: info.haId, programKey: programKey);
       for (var option in options) {
         for (var constraint in constraints) {
           if (option.key == constraint.key) {
@@ -102,17 +102,18 @@ class DeviceOven extends HomeDevice {
   }
 
   @override
-  void startProgram(
-      {String? programKey, required List<DeviceOptions> options}) {
+  Future<void> startProgram(
+      {String? programKey, required List<DeviceOptions> options}) async {
     programKey ??= selectedProgram.key;
     if (programKey.isEmpty) {
       throw Exception("No program selected");
     }
     try {
-      api.startProgram(
+      print(api);
+      await api.startProgram(
           haid: info.haId, programKey: programKey, options: options);
     } catch (e) {
-      throw Exception("Something went wrong: $e");
+      throw Exception("Something went wrong: $e, $options, $programKey");
     }
   }
 

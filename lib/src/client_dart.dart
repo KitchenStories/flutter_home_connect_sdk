@@ -155,7 +155,7 @@ class HomeConnectApi {
             result.add(mock);
             break;
           default:
-          // throw Exception('Unknown device type: $deviceType');
+            throw Exception('Unknown device type: $deviceType');
         }
       }
       return result;
@@ -262,7 +262,7 @@ class HomeConnectApi {
     });
   }
 
-  Future<List<DeviceOptions>> getProgramOptionsConstraints({required String haId, required String programKey}) async {
+  Future<List<DeviceOptions>> getProgramOptions({required String haId, required String programKey}) async {
     String path = "$haId/programs/available/$programKey";
     var res = await get(path);
     var data = json.decode(res.body);
