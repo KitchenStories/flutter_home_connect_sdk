@@ -1,4 +1,4 @@
-import 'package:flutter_home_connect_sdk/src/models/constraints/option_constraints.dart';
+import 'package:flutter_home_connect_sdk/src/models/options/constraints/option_constraints.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'program_options.g.dart';

@@ -110,7 +110,7 @@ void main() {
 
   DeviceInfo infoPayload = DeviceInfo.fromJson(info);
 
-  final device = DeviceOven.fromPayload(api, infoPayload, [], [], []);
+  final device = DeviceOven.fromPayload(api, infoPayload, [], [], [], []);
 
   group('Api test', () {
     test('get existing device', () async {
@@ -228,6 +228,7 @@ void main() {
           ),
           [],
           [],
+          [],
           []);
 
       final mockClient = MockClient((request) async {
@@ -268,6 +269,7 @@ void main() {
               "haId": "haid"
             },
           ),
+          [],
           [],
           [],
           []);

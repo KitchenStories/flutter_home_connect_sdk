@@ -1,11 +1,11 @@
 import 'package:eventsource/eventsource.dart';
 
-import 'package:flutter_home_connect_sdk/src/home_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
 import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
 
 class DishwasherDevice extends HomeDevice {
-  DishwasherDevice(super.api, super.info, super.status, super.programs);
+  DishwasherDevice(super.api, super.info, super.status, super.programs, super.settings);
 
   @override
   Future<List<DeviceProgram>> getPrograms() {

@@ -1,17 +1,18 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'device_status.dart';
+part of 'device_setting.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DeviceStatus _$DeviceStatusFromJson(Map<String, dynamic> json) => DeviceStatus(
-      json['key'] as String,
-      json['value'],
+DeviceSetting _$DeviceSettingFromJson(Map<String, dynamic> json) =>
+    DeviceSetting(
+      key: json['key'] as String,
+      value: json['value'],
     );
 
-Map<String, dynamic> _$DeviceStatusToJson(DeviceStatus instance) =>
+Map<String, dynamic> _$DeviceSettingToJson(DeviceSetting instance) =>
     <String, dynamic>{
       'key': instance.key,
       'value': instance.value,

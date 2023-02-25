@@ -1,15 +1,10 @@
 import 'package:eventsource/eventsource.dart';
-import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
-import 'package:flutter_home_connect_sdk/src/home_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/info/device_info.dart';
+import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
 import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
-import 'package:flutter_home_connect_sdk/src/models/status/device_status.dart';
 
 class CoffeeDevice extends HomeDevice {
-  CoffeeDevice(HomeConnectApi api, DeviceInfo info, List<ProgramOptions> options, List<DeviceStatus> status,
-      List<DeviceProgram> programs)
-      : super(api, info, status, programs);
+  CoffeeDevice(super.api, super.info, super.status, super.programs, super.settings);
 
   @override
   void turnOff() {

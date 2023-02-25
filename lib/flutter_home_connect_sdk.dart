@@ -5,9 +5,9 @@ library flutter_home_connect_sdk;
 
 export 'src/client/client_dart.dart';
 export 'src/oauth/auth.dart';
-export 'src/home_device.dart';
-export 'src/models/device_settings.dart';
-export 'src/models/constraints/option_constraints.dart';
+export 'src/models/home_device.dart';
+export 'src/models/settings/settings_enums.dart';
+export 'src/models/options/constraints/option_constraints.dart';
 export 'src/models/options/program_options.dart';
 export 'src/models/programs/device_program.dart';
 export 'src/models/status/device_status.dart';

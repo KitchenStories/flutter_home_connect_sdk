@@ -3,6 +3,7 @@ import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/models/info/device_info.dart';
 import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
 import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
+import 'package:flutter_home_connect_sdk/src/models/settings/device_setting.dart';
 import 'package:flutter_home_connect_sdk/src/models/status/device_status.dart';
 
 enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishwasher }
@@ -26,6 +27,7 @@ abstract class HomeDevice {
   late DeviceProgram selectedProgram;
   List<DeviceStatus> status;
   List<DeviceProgram> programs;
+  List<DeviceSetting> settings;
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
@@ -34,7 +36,7 @@ abstract class HomeDevice {
   String get deviceName => info.name;
   String get deviceHaId => info.haId;
 
-  HomeDevice(this.api, this.info, this.status, this.programs);
+  HomeDevice(this.api, this.info, this.status, this.programs, this.settings);
 
   /// Initializes the device
   ///
@@ -43,6 +45,7 @@ abstract class HomeDevice {
   Future<HomeDevice> init() async {
     programs = await api.getPrograms(haId: info.haId);
     status = await api.getStatus(haId: info.haId);
+    settings = await api.getSettings(haId: info.haId);
     return this;
   }
 

@@ -5,12 +5,11 @@ part 'device_status.g.dart';
 @JsonSerializable()
 class DeviceStatus {
   final String key;
-  String value = '';
+  dynamic value;
 
-  DeviceStatus(this.key, String value);
+  DeviceStatus(this.key, dynamic value);
 
   Map<String, dynamic> toJson() => _$DeviceStatusToJson(this);
 
-  factory DeviceStatus.fromJson(Map<String, dynamic> json) =>
-      _$DeviceStatusFromJson(json);
+  factory DeviceStatus.fromJson(Map<String, dynamic> json) => _$DeviceStatusFromJson(json);
 }

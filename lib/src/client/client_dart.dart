@@ -4,6 +4,9 @@ import 'dart:core';
 
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
+import 'package:flutter_home_connect_sdk/src/models/event/event_controller.dart';
+import 'package:flutter_home_connect_sdk/src/models/settings/constraints/setting_constraints.dart';
+import 'package:flutter_home_connect_sdk/src/models/settings/device_setting.dart';
 import 'package:flutter_home_connect_sdk/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
@@ -149,7 +152,7 @@ class HomeConnectApi {
           //   result.add(mock);
           //   break;
           default:
-            throw Exception('Unknown device type: $deviceType');
+          // throw Exception('Unknown device type: $deviceType');
         }
       }
       return result;
@@ -197,18 +200,23 @@ class HomeConnectApi {
     }
   }
 
-  Future<void> startListening(String haid, Function callback) async {
-    final uri = baseUrl.join("$haid/events");
-    final headers = commonHeaders;
+  Future<void> startListening({required String? haid}) async {
+    final uri = baseUrl.join("/api/homeappliances/$haid/events");
+    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+    EventController eventController = EventController();
+    _accessToken = userCredentials!.accessToken;
 
-    EventSource eventSource = await EventSource.connect(
-      uri.toString(),
-      headers: headers,
-    );
-
-    subscription = eventSource.listen((Event event) {
-      callback(event);
-    });
+    try {
+      EventSource eventSource = await EventSource.connect(
+        uri,
+        headers: commonHeaders,
+      );
+      subscription = eventSource.listen((Event event) {
+        eventController.handleEvent(event);
+      });
+    } catch (e) {
+      print("something went wrong: ${(e as EventSourceSubscriptionException).message}");
+    }
   }
 
   Future<List<ProgramOptions>> getProgramOptions({required String haId, required String programKey}) async {
@@ -253,21 +261,16 @@ class HomeConnectApi {
     }
   }
 
-  Future<List<DeviceStatus>> getStatus({required String haId}) {
-    Map<String, dynamic> statResponse = {
-      "data": {
-        "status": [
-          {"key": "BSH.Common.Status.RemoteControlActive", "value": 'true'},
-          {"key": "BSH.Common.Status.RemoteControlStartAllowed", "value": 'true'},
-          {"key": "BSH.Common.Status.OperationState", "value": "BSH.Common.EnumType.OperationState.Ready"},
-          {"key": "BSH.Common.Status.DoorState", "value": "BSH.Common.EnumType.DoorState.Closed"},
-          {"key": "Cooking.Oven.Status.CurrentCavityTemperature", "value": '20'}
-        ]
-      }
-    };
-    List<DeviceStatus> stList = (statResponse['data']['status'] as List).map((e) => DeviceStatus.fromJson(e)).toList();
-    var response = Future.delayed(Duration(seconds: 1), () => stList);
-    return response;
+  Future<List<DeviceStatus>> getStatus({required String haId}) async {
+    final path = "$haId/status";
+    try {
+      var response = await get(path);
+      List<DeviceStatus> stList =
+          (json.decode(response.body)['data']['status'] as List).map((e) => DeviceStatus.fromJson(e)).toList();
+      return stList;
+    } catch (e) {
+      throw Exception("Error: $e");
+    }
   }
 
   Future<List<DeviceProgram>> getPrograms({required String haId}) async {
@@ -310,5 +313,27 @@ class HomeConnectApi {
 
     final userCredentials = await storage.getCredentials();
     return userCredentials;
+  }
+
+  Future<List<DeviceSetting>> getSettings({required String haId}) async {
+    final settingPath = "$haId/settings";
+    try {
+      var settingRes = await get(settingPath);
+      List<DeviceSetting> stList =
+          (json.decode(settingRes.body)['data']['settings'] as List).map((e) => DeviceSetting.fromJson(e)).toList();
+
+      for (var element in stList) {
+        var settingKey = element.key;
+        element.constraints = SettingsConstraints(allowedValues: []);
+        var constraintRes = await get("$haId/settings/$settingKey");
+        for (var e in (json.decode(constraintRes.body)['data']['constraints']['allowedvalues'] as List)) {
+          element.constraints.allowedValues.add(e);
+        }
+      }
+
+      return stList;
+    } catch (e) {
+      throw Exception("Error: $e");
+    }
   }
 }
