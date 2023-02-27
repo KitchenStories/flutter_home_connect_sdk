@@ -7,7 +7,7 @@ class DeviceStatus {
   final String key;
   dynamic value;
 
-  DeviceStatus(this.key, dynamic value);
+  DeviceStatus(this.key, this.value);
 
   Map<String, dynamic> toJson() => _$DeviceStatusToJson(this);
 

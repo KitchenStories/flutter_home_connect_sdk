@@ -219,6 +219,10 @@ class HomeConnectApi {
     }
   }
 
+  Future<void> stopListening() async {
+    await subscription.cancel();
+  }
+
   Future<List<ProgramOptions>> getProgramOptions({required String haId, required String programKey}) async {
     String path = "$haId/programs/available/$programKey";
     var res = await get(path);
@@ -267,6 +271,10 @@ class HomeConnectApi {
       var response = await get(path);
       List<DeviceStatus> stList =
           (json.decode(response.body)['data']['status'] as List).map((e) => DeviceStatus.fromJson(e)).toList();
+      for (var element in stList) {
+        print(element.key);
+        print(element.value);
+      }
       return stList;
     } catch (e) {
       throw Exception("Error: $e");
