@@ -1,4 +1,4 @@
-import 'package:flutter_home_connect_sdk/src/models/payloads/option_constraints.dart';
+import 'package:homeconnect/src/models/payloads/option_constraints.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'device_options.g.dart';

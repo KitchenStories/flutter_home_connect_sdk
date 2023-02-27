@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
-import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
+import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/src/models/washer_device.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';

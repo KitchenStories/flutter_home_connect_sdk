@@ -1,7 +1,7 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
-library flutter_home_connect_sdk;
+library homeconnect;
 
 export 'src/client_dart.dart';
 export 'src/auth.dart';

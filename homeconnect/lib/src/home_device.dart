@@ -1,9 +1,9 @@
 import 'package:eventsource/eventsource.dart';
-import 'package:flutter_home_connect_sdk/src/client_dart.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_info.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_options.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_program.dart';
-import 'package:flutter_home_connect_sdk/src/models/payloads/device_status.dart';
+import 'package:homeconnect/src/client_dart.dart';
+import 'package:homeconnect/src/models/payloads/device_info.dart';
+import 'package:homeconnect/src/models/payloads/device_options.dart';
+import 'package:homeconnect/src/models/payloads/device_program.dart';
+import 'package:homeconnect/src/models/payloads/device_status.dart';
 
 enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishwasher }
 

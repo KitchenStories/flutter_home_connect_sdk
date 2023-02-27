@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:eventsource/eventsource.dart';
-import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
-import 'package:flutter_home_connect_sdk/src/models/coffee_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/dishwasher_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/dryer_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/fridge_freezer_device.dart';
-import 'package:flutter_home_connect_sdk/src/models/washer_device.dart';
-import 'package:flutter_home_connect_sdk/src/utils/utils.dart';
+import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/src/models/coffee_device.dart';
+import 'package:homeconnect/src/models/dishwasher_device.dart';
+import 'package:homeconnect/src/models/dryer_device.dart';
+import 'package:homeconnect/src/models/fridge_freezer_device.dart';
+import 'package:homeconnect/src/models/washer_device.dart';
+import 'package:homeconnect/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
 import './utils/uri.dart';

@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  test-sdk:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,9 +16,12 @@ jobs:
 
       - name: Install dependencies
         run: dart pub get
+        working-directory: homeconnect
 
       - name: Analyze project source
         run: dart analyze --fatal-infos
+        working-directory: homeconnect
 
       - name: Run tests
         run: dart test
+        working-directory: homeconnect

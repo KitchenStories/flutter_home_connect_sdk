@@ -11,8 +11,11 @@ DeviceOptions _$DeviceOptionsFromJson(Map<String, dynamic> json) =>
       json['key'] as String,
       json['type'] as String?,
       json['unit'] as String?,
-      json['value'] as String?,
-      json['constraints'],
+      json['value'],
+      json['constraints'] == null
+          ? null
+          : OptionConstraints.fromJson(
+              json['constraints'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DeviceOptionsToJson(DeviceOptions instance) =>
