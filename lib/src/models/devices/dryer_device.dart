@@ -1,4 +1,3 @@
-import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
 
