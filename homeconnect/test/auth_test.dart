@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import 'package:flutter_home_connect_sdk/src/models/payloads/oauth_token.dart';
+import 'package:homeconnect/src/models/payloads/oauth_token.dart';
 
 void main() {
   group('Auth', () {

@@ -1,4 +1,4 @@
-import 'package:flutter_home_connect_sdk/src/home_device.dart';
+import 'package:homeconnect/src/home_device.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'device_info.g.dart';
 
