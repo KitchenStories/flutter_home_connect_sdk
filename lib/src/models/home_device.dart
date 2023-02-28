@@ -1,5 +1,5 @@
-import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
+import 'package:flutter_home_connect_sdk/src/models/event/device_event.dart';
 import 'package:flutter_home_connect_sdk/src/models/info/device_info.dart';
 import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
 import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
@@ -49,7 +49,9 @@ abstract class HomeDevice {
     return this;
   }
 
-  void updateStatusFromEvent(Event event);
+  void updateStatusFromEvent({required List<DeviceEvent> eventData});
+
+  void updateSettingsFromEvent({required List<DeviceEvent> eventData});
 
   /// Selects a program to run on the selected home appliance
   /// [programKey] - the key of the program to select
@@ -91,4 +93,10 @@ abstract class HomeDevice {
       print('listening');
     }
   }
+}
+
+abstract class DeviceData {
+  final String key;
+  dynamic value;
+  DeviceData({required this.key, required this.value});
 }

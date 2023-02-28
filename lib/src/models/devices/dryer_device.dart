@@ -4,6 +4,8 @@ import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart
 
 import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
 
+import '../event/device_event.dart';
+
 class DryerDevice extends HomeDevice {
   DryerDevice(super.api, super.info, super.status, super.programs, super.settings);
 
@@ -40,7 +42,12 @@ class DryerDevice extends HomeDevice {
   }
 
   @override
-  void updateStatusFromEvent(Event event) {
+  void updateStatusFromEvent({required List<DeviceEvent> eventData}) {
     // TODO: implement updateStatusFromEvent
+  }
+
+  @override
+  void updateSettingsFromEvent({required List<DeviceEvent> eventData}) {
+    // TODO: implement updateSettingsFromEvent
   }
 }

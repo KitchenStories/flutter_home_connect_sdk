@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
 
@@ -87,14 +85,24 @@ class DeviceOven extends HomeDevice {
   }
 
   @override
-  void updateStatusFromEvent(Event event) {
-    Map<String, dynamic> eventMap = json.decode(event.data!);
-    List<dynamic> list = eventMap['items'];
-    DeviceEvent deviceEvent = DeviceEvent.fromJson(list[0]);
+  void updateStatusFromEvent({required List<DeviceEvent> eventData}) {
+    _updateValues(eventData: eventData, data: status);
+  }
 
-    for (var stat in status) {
-      if (stat.key == deviceEvent.key) {
-        stat.value = deviceEvent.value;
+  @override
+  void updateSettingsFromEvent({required List<DeviceEvent> eventData}) {
+    _updateValues(eventData: eventData, data: settings);
+  }
+
+  void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {
+    for (var event in eventData) {
+      for (var stat in data) {
+        if (stat.key == event.key) {
+          print("original ${stat.value} value: ${event.value}");
+          print("Updating ${stat.key} to ${event.value}");
+
+          stat.value = event.value;
+        }
       }
     }
   }

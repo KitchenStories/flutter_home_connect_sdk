@@ -200,8 +200,8 @@ class HomeConnectApi {
     }
   }
 
-  Future<void> startListening({required String? haid}) async {
-    final uri = baseUrl.join("/api/homeappliances/$haid/events");
+  Future<void> startListening({required HomeDevice source}) async {
+    final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     EventController eventController = EventController();
     _accessToken = userCredentials!.accessToken;
@@ -212,7 +212,7 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
-        eventController.handleEvent(event);
+        eventController.handleEvent(event, source);
       });
     } catch (e) {
       print("something went wrong: ${(e as EventSourceSubscriptionException).message}");
@@ -271,10 +271,6 @@ class HomeConnectApi {
       var response = await get(path);
       List<DeviceStatus> stList =
           (json.decode(response.body)['data']['status'] as List).map((e) => DeviceStatus.fromJson(e)).toList();
-      for (var element in stList) {
-        print(element.key);
-        print(element.value);
-      }
       return stList;
     } catch (e) {
       throw Exception("Error: $e");
@@ -327,10 +323,12 @@ class HomeConnectApi {
     final settingPath = "$haId/settings";
     try {
       var settingRes = await get(settingPath);
+      json.decode(settingRes.body)['data']['settings'].forEach((e) => print(e));
       List<DeviceSetting> stList =
           (json.decode(settingRes.body)['data']['settings'] as List).map((e) => DeviceSetting.fromJson(e)).toList();
 
       for (var element in stList) {
+        print(element.key);
         var settingKey = element.key;
         element.constraints = SettingsConstraints(allowedValues: []);
         var constraintRes = await get("$haId/settings/$settingKey");
@@ -341,7 +339,7 @@ class HomeConnectApi {
 
       return stList;
     } catch (e) {
-      throw Exception("Error: $e");
+      throw Exception("Error here?: $e");
     }
   }
 }

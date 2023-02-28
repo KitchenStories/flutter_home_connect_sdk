@@ -41,27 +41,15 @@ void main() async {
     final res = await api.getDevices();
     var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
     await selectedDevice.init();
-    // print(selectedDevice.status);
     await selectedDevice.getPrograms();
-
-    print(selectedDevice.info.haId);
-    selectedDevice.programs.toList().forEach((element) {
-      print(element.key);
-    });
     await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
-
-    print(selectedDevice.selectedProgram.options);
-    for (var element in selectedDevice.selectedProgram.options) {
-      print(element.constraints!.toJson());
-      print(element.unit);
-    }
 
     final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
     final option2 = ProgramOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
 
-    selectedDevice.startProgram(options: [option1, option2]);
+    // selectedDevice.startProgram(options: [option1, option2]);
 
-    api.startListening(haid: 'BOSCH-HCS01OVN1-54E7EF9DEDBB');
+    api.startListening(source: selectedDevice);
   } catch (e) {
     api.stopListening();
   }

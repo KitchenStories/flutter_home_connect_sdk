@@ -1,4 +1,4 @@
-import 'package:eventsource/eventsource.dart';
+import 'package:flutter_home_connect_sdk/src/models/event/device_event.dart';
 import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
 import 'package:flutter_home_connect_sdk/src/models/options/program_options.dart';
 import 'package:flutter_home_connect_sdk/src/models/programs/device_program.dart';
@@ -39,7 +39,12 @@ class WasherDevice extends HomeDevice {
   }
 
   @override
-  void updateStatusFromEvent(Event event) {
+  void updateStatusFromEvent({required List<DeviceEvent> eventData}) {
     // TODO: implement updateStatusFromEvent
+  }
+
+  @override
+  void updateSettingsFromEvent({required List<DeviceEvent> eventData}) {
+    // TODO: implement updateSettingsFromEvent
   }
 }

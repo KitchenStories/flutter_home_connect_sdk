@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/models/event/device_event.dart';
+import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
 
 enum EventType { notify, status, keepAlive, nil }
+
+typedef EventFunction = void Function(Event event, HomeDevice source);
 
 Map<String, EventType> _eventTypeMap = {
   'NOTIFY': EventType.notify,
@@ -12,29 +15,41 @@ Map<String, EventType> _eventTypeMap = {
   'null': EventType.nil,
 };
 
+Map<EventType, List<EventFunction>> functionMap = {
+  EventType.status: [],
+  EventType.notify: [],
+  EventType.keepAlive: [],
+  EventType.nil: [],
+};
+
 class EventController {
-  void handleEvent(Event event) {
-    DeviceEvent deviceEvent;
-    switch (_eventTypeMap[event.event]) {
-      case EventType.notify:
-        print("NOTIFY event");
-        break;
-      case EventType.status:
-        print("STATUS event");
+  List<EventFunction> statusFunctions = [
+    (event, source) => source.updateStatusFromEvent(
+        eventData: (json.decode(event.data!)['items'] as List).map((e) => DeviceEvent.fromJson(e)).toList()),
+    (event, source) => source.updateSettingsFromEvent(
+        eventData: (json.decode(event.data!)['items'] as List).map((e) => DeviceEvent.fromJson(e)).toList()),
+  ];
+
+  List<EventFunction> notifyFunctions = [];
+
+  List<EventFunction> keepAliveFunctions = [];
+
+  List<EventFunction> nilFunctions = [];
+
+  EventController() {
+    functionMap[EventType.status] = statusFunctions;
+    functionMap[EventType.notify] = notifyFunctions;
+    functionMap[EventType.keepAlive] = keepAliveFunctions;
+    functionMap[EventType.nil] = nilFunctions;
+  }
+
+  void handleEvent(Event event, HomeDevice source) {
+    if (functionMap.containsKey(_eventTypeMap[event.event])) {
+      print("key exists : ${event.event}, calling function");
+      for (var element in functionMap[_eventTypeMap[event.event]]!) {
         print(event.data);
-        try {
-          deviceEvent = DeviceEvent.fromJson(json.decode(event.data!));
-          print(deviceEvent.key);
-        } catch (e) {
-          print(e);
-        }
-        break;
-      case EventType.keepAlive:
-        print("KEEP-ALIVE event");
-        break;
-      default:
-        print(EventType.nil);
-        break;
+        element(event, source);
+      }
     }
   }
 }
