@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:homeconnect/client/client_dart.dart';
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/oauth/auth.dart';
-import 'package:homeconnect/src/home_device.dart';
 
 const accessToken = "";
 const refreshToken = "";
@@ -42,6 +40,7 @@ void main() async {
     final res = await api.getDevices();
     var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
     await selectedDevice.init();
+    selectedDevice.startListening();
     await selectedDevice.getPrograms();
     for (var element in selectedDevice.programs) {
       print(element.key);

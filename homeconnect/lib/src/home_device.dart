@@ -1,4 +1,3 @@
-import 'package:homeconnect/client/client_dart.dart';
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
 
