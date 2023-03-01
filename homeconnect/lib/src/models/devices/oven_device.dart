@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:homeconnect/client/client_dart.dart';
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/src/home_device.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
 import 'package:homeconnect/src/models/settings/constraints/setting_constraints.dart';
 import 'package:homeconnect/src/models/settings/device_setting.dart';

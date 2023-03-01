@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:homeconnect/client/client_dart.dart';
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/oauth/auth.dart';
 import 'package:http/testing.dart';
