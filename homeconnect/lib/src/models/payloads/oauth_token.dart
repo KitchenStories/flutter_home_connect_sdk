@@ -14,7 +14,8 @@ class OauthTokenResponsePayload {
     required this.expiresIn,
   });
 
-  factory OauthTokenResponsePayload.fromJson(Map<String, dynamic> json) => _$OauthTokenResponsePayloadFromJson(json);
+  factory OauthTokenResponsePayload.fromJson(Map<String, dynamic> json) =>
+      _$OauthTokenResponsePayloadFromJson(json);
 
   Map<String, dynamic> toJson() => _$OauthTokenResponsePayloadToJson(this);
 }

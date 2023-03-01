@@ -24,12 +24,10 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(":build");
     controller = WebViewController()..loadRequest(Uri.parse(authorizationUrl));
 
     controller.setNavigationDelegate(
       NavigationDelegate(onNavigationRequest: (navReq) {
-        print("fetching: ${navReq.url}");
         // if redirect url is called, we have to extract the code from the url
         if (navReq.url.startsWith(redirectUrl.toString())) {
           final responseUrl = Uri.parse(navReq.url);

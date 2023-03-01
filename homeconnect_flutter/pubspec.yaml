@@ -17,6 +17,7 @@ dependencies:
   homeconnect:
     path: ../homeconnect
   webview_flutter: ^4.0.5
+  shared_preferences: ^2.0.18
 
 dev_dependencies:
   mockito: ^5.3.2
