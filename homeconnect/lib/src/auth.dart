@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
 
 import './models/payloads/oauth_token.dart';
+import './auth_exceptions.dart';
 
 // load join extension
 import './utils/uri.dart';
@@ -22,16 +23,20 @@ class HomeConnectAuthCredentials {
   Map<String, dynamic> parseJwt(String token) {
     final parts = token.split('.');
     if (parts.length != 3) {
-      throw Exception('invalid token');
+      throw InvalidTokenException('invalid token');
     }
 
-    final payload = _decodeBase64(parts[1]);
-    final payloadMap = json.decode(payload);
-    if (payloadMap is! Map<String, dynamic>) {
-      throw Exception('invalid payload');
+    try {
+      final payload = _decodeBase64(parts[1]);
+      final payloadMap = json.decode(payload);
+      if (payloadMap is! Map<String, dynamic>) {
+        throw InvalidTokenException('invalid payload');
+      }
+      return payloadMap;
+    } on Exception {
+      // handle decode error
+      throw InvalidTokenException('invalid token');
     }
-
-    return payloadMap;
   }
 
   String _decodeBase64(String str) {
@@ -87,6 +92,10 @@ class HomeConnectClientCredentials {
 }
 
 abstract class HomeConnectAuth {
+  /// Get the code grant url
+  ///
+  /// Given the [baseUrl] and client [credentials] return the url
+  /// to which the user should be redirected to authorize the app.
   Uri getCodeGrant(Uri baseUrl, HomeConnectClientCredentials credentials) {
     final grant = oauth2.AuthorizationCodeGrant(
       credentials.clientId,
@@ -97,19 +106,27 @@ abstract class HomeConnectAuth {
     return grant.getAuthorizationUrl(Uri.parse(credentials.redirectUri));
   }
 
-  Future<HomeConnectAuthCredentials> exchangeCode(
-      Uri baseUrl, HomeConnectClientCredentials credentials, String code) async {
-    final tokenResponse = await http.post(
-      baseUrl.join('/security/oauth/token'),
-      body: {
-        'grant_type': 'authorization_code',
-        'code': code,
-        'client_id': credentials.clientId,
-        'redirect_uri': credentials.redirectUri,
-      },
-    );
+  /// Exchange the [code] for an access token.
+  /// throws [OauthCodeException] if the code request fails.
+  Future<HomeConnectAuthCredentials> exchangeCode(Uri baseUrl,
+      HomeConnectClientCredentials credentials, String code) async {
+    late final http.Response tokenResponse;
+    try {
+      tokenResponse = await http.post(
+        baseUrl.join('/security/oauth/token'),
+        body: {
+          'grant_type': 'authorization_code',
+          'code': code,
+          'client_id': credentials.clientId,
+          'redirect_uri': credentials.redirectUri,
+        },
+      );
+    } catch (e) {
+      throw OauthCodeException('Failed to refresh token');
+    }
 
-    final res = OauthTokenResponsePayload.fromJson(json.decode(tokenResponse.body));
+    final res =
+        OauthTokenResponsePayload.fromJson(json.decode(tokenResponse.body));
     return HomeConnectAuthCredentials(
       accessToken: res.accessToken,
       refreshToken: res.refreshToken,
@@ -117,14 +134,18 @@ abstract class HomeConnectAuth {
     );
   }
 
-  Future<HomeConnectAuthCredentials> authorize(Uri baseUrl, HomeConnectClientCredentials credentials);
-  Future<HomeConnectAuthCredentials> refresh(Uri baseUrl, String refreshToken) async {
+  Future<HomeConnectAuthCredentials> authorize(
+      Uri baseUrl, HomeConnectClientCredentials credentials);
+
+  /// Refresh the access token with the provided [refreshToken].
+  Future<HomeConnectAuthCredentials> refresh(
+      Uri baseUrl, String refreshToken) async {
     final res = await http.post(baseUrl.join("security/oauth/token"), body: {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,
     });
     if (res.statusCode != 200) {
-      throw Exception('Failed to refresh token');
+      throw RefreshTokenException('Failed to refresh token');
     }
     final tokenRes = OauthTokenResponsePayload.fromJson(json.decode(res.body));
     return HomeConnectAuthCredentials(
