@@ -16,3 +16,13 @@ class DeviceStatus implements DeviceData {
 
   factory DeviceStatus.fromJson(Map<String, dynamic> json) => _$DeviceStatusFromJson(json);
 }
+
+class DeviceStatsListPayload {
+  final List<DeviceStatus> stats;
+
+  DeviceStatsListPayload(this.stats);
+  factory DeviceStatsListPayload.fromJson(Map<String, dynamic> json) {
+    var stats = json['data']['status'] as List;
+    return DeviceStatsListPayload(stats.map((e) => DeviceStatus.fromJson(e as Map<String, dynamic>)).toList());
+  }
+}

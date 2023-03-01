@@ -45,9 +45,7 @@ class EventController {
 
   void handleEvent(Event event, HomeDevice source) {
     if (functionMap.containsKey(_eventTypeMap[event.event])) {
-      print("key exists : ${event.event}, calling function");
       for (var element in functionMap[_eventTypeMap[event.event]]!) {
-        print(event.data);
         element(event, source);
       }
     }

@@ -28,3 +28,13 @@ class ProgramOptions {
     return ProgramOptions(key, null, null, value, null);
   }
 }
+
+class ProgramOptionsListPayload {
+  final List<ProgramOptions> options;
+
+  ProgramOptionsListPayload(this.options);
+  factory ProgramOptionsListPayload.fromJson(Map<String, dynamic> json) {
+    var options = json['data']['options'] as List;
+    return ProgramOptionsListPayload(options.map((e) => ProgramOptions.fromJson(e as Map<String, dynamic>)).toList());
+  }
+}

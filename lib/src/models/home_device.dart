@@ -43,9 +43,9 @@ abstract class HomeDevice {
   /// Sets the [status] and [programs] properties for this device
   /// by calling the [getPrograms] and [getStatus] methods.
   Future<HomeDevice> init() async {
-    programs = await api.getPrograms(haId: info.haId);
-    status = await api.getStatus(haId: info.haId);
-    settings = await api.getSettings(haId: info.haId);
+    programs = await getPrograms();
+    status = await getStatus();
+    settings = await getSettings();
     return this;
   }
 
@@ -65,6 +65,10 @@ abstract class HomeDevice {
   /// Sets the [programs] property to the list of programs.
   /// Trhows generic exception if the request fails.
   Future<List<DeviceProgram>> getPrograms();
+
+  Future<List<DeviceStatus>> getStatus();
+
+  Future<List<DeviceSetting>> getSettings();
 
   /// Starts the selected program
   ///
@@ -88,13 +92,14 @@ abstract class HomeDevice {
   /// Turns off the selected home appliance
   void turnOff();
 
-  void listen() {
-    while (true) {
-      print('listening');
-    }
-  }
+  /// Starts listening for events from the selected home appliance
+  void startListening();
+
+  /// Stops listening for events from the selected home appliance
+  void stopListening();
 }
 
+// General data body used to update the status and settings of the device
 abstract class DeviceData {
   final String key;
   dynamic value;

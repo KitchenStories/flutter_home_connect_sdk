@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_home_connect_sdk/src/client/client_dart.dart';
 import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
+import 'package:flutter_home_connect_sdk/src/models/settings/constraints/setting_constraints.dart';
 
 import 'package:flutter_home_connect_sdk/src/models/settings/settings_enums.dart';
 import 'package:flutter_home_connect_sdk/src/models/event/device_event.dart';
@@ -25,22 +27,44 @@ class DeviceOven extends HomeDevice {
     return DeviceOven(api, info, [], [], [], []);
   }
 
-  Map<String, dynamic> toPowerPayload(String key, dynamic value) {
-    return {
-      "data": {"key": key, "value": value}
-    };
-  }
+  @override
+  Future<List<DeviceProgram>> getPrograms() async {
+    String resource = "$deviceHaId/programs/available";
+    final res = await api.get(resource);
+    final data = json.decode(res.body);
+    final programs = ProgramListPayload.fromJson(data).programs;
 
-  void updateStatus(DeviceStatus stats) {
-    status.removeWhere((element) => element.key == stats.key);
-    status.add(stats);
+    return programs;
   }
 
   @override
-  Future<List<DeviceProgram>> getPrograms() async {
+  Future<List<DeviceStatus>> getStatus() async {
+    String resource = "$deviceHaId/status";
+    final res = await api.get(resource);
+    final data = json.decode(res.body);
+    final status = DeviceStatsListPayload.fromJson(data).stats;
+    return status;
+  }
+
+  @override
+  Future<List<DeviceSetting>> getSettings() async {
+    // Get device settings
+    String resource = "$deviceHaId/settings";
     try {
-      programs = await api.getPrograms(haId: info.haId);
-      return programs;
+      final res = await api.get(resource);
+      final data = json.decode(res.body);
+      final settings = SettingsListPayload.fromJson(data).settings;
+      // Get constraints for each setting
+      for (var setting in settings) {
+        setting.constraints = SettingsConstraints(allowedValues: []);
+        var constraintResponse = await api.get("$deviceHaId/settings/${setting.key}");
+        final data = json.decode(constraintResponse.body);
+        // Add constraints to setting
+        final allowedValuesResponse = AllowedValuesPayload.fromJson(data).constraints.allowedValues;
+        setting.constraints.allowedValues.addAll(allowedValuesResponse);
+      }
+      // Return complete list of settings
+      return settings;
     } catch (e) {
       throw Exception("Something went wrong: $e");
     }
@@ -49,11 +73,20 @@ class DeviceOven extends HomeDevice {
   @override
   Future<void> selectProgram({required String programKey}) async {
     try {
-      await api.selectProgram(haId: info.haId, programKey: programKey);
-      List<ProgramOptions> options = await api.getSelectedProgramOptions(haId: info.haId);
-      selectedProgram = DeviceProgram(programKey, options);
-      final constraints = await api.getProgramOptions(haId: info.haId, programKey: programKey);
-      for (var option in options) {
+      // Select program, sends put request
+      final SelectProgramPayload payload = SelectProgramPayload(this, programKey);
+      await api.put(body: payload.body, resource: payload.resource);
+      // Get program options, /selected returns the program with no constraints
+      var res = await api.get("$deviceHaId/programs/selected");
+      var data = json.decode(res.body);
+      final selectedOptions = ProgramOptionsListPayload.fromJson(data).options;
+      selectedProgram = DeviceProgram(programKey, selectedOptions);
+      // Get program options with constraints
+      var constraintsRes = await api.get("$deviceHaId/programs/available/$programKey");
+      var constraintsData = json.decode(constraintsRes.body);
+      final constraints = ProgramOptionsListPayload.fromJson(constraintsData).options;
+
+      for (var option in selectedOptions) {
         for (var constraint in constraints) {
           if (option.key == constraint.key) {
             option.constraints = constraint.constraints;
@@ -65,23 +98,30 @@ class DeviceOven extends HomeDevice {
     }
   }
 
+  @override
+  Future<void> startProgram({String? programKey, required List<ProgramOptions> options}) async {
+    programKey ??= selectedProgram.key;
+    if (programKey.isEmpty) {
+      throw Exception("No program selected");
+    }
+    try {
+      final payload = StartProgramPayload(this, options);
+      await api.put(body: payload.body, resource: payload.resource);
+    } catch (e) {
+      throw Exception("Something went wrong: $e, $options, $programKey");
+    }
+  }
+
   /// Sets the [OvenSettings.power] enum to `off`
   @override
   void turnOff() {
-    final key = settingsMap[OvenSettings.power];
-    final value = validValuesMap[OvenSettings.power]?['off'];
-    final payload = toPowerPayload(key!, value!);
-
-    api.putPowerState(deviceHaId, key, payload);
+    _setPower("off");
   }
 
   /// Sets the [OvenSettings.power] enum to `on`
   @override
   void turnOn() {
-    final key = settingsMap[OvenSettings.power];
-    final value = validValuesMap[OvenSettings.power]?['on'];
-    final payload = toPowerPayload(key!, value!);
-    api.putPowerState(deviceHaId, key, payload);
+    _setPower("on");
   }
 
   @override
@@ -94,38 +134,50 @@ class DeviceOven extends HomeDevice {
     _updateValues(eventData: eventData, data: settings);
   }
 
+  @override
+  void stopProgram() {
+    String resource = "$deviceHaId/programs/active";
+    try {
+      api.delete(resource);
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
+  }
+
+  /// Starts listening for events from the device
+  @override
+  Future<void> startListening() async {
+    try {
+      await api.openEventListenerChannel(source: this);
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
+  }
+
+  /// Stops listening for events from the device
+  @override
+  Future<void> stopListening() async {
+    try {
+      await api.closeEventChannel();
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
+  }
+
   void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {
     for (var event in eventData) {
       for (var stat in data) {
         if (stat.key == event.key) {
-          print("original ${stat.value} value: ${event.value}");
-          print("Updating ${stat.key} to ${event.value}");
-
           stat.value = event.value;
         }
       }
     }
   }
 
-  @override
-  void startProgram({String? programKey, required List<ProgramOptions> options}) {
-    programKey ??= selectedProgram.key;
-    if (programKey.isEmpty) {
-      throw Exception("No program selected");
-    }
-    try {
-      api.startProgram(haid: info.haId, programKey: programKey, options: options);
-    } catch (e) {
-      throw Exception("Something went wrong: $e, $options, $programKey");
-    }
-  }
-
-  @override
-  void stopProgram() {
-    try {
-      api.stopProgram(haid: info.haId);
-    } catch (e) {
-      throw Exception("Something went wrong: $e");
-    }
+  void _setPower(String state) {
+    final programKey = settingsMap[OvenSettings.power];
+    final value = validValuesMap[OvenSettings.power]?[state];
+    final payload = SetSettingsPayload(deviceHaId, programKey!, value);
+    api.put(resource: payload.resource, body: payload.body);
   }
 }

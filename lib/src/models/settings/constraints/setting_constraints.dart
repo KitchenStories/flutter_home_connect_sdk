@@ -12,3 +12,13 @@ class SettingsConstraints {
 
   factory SettingsConstraints.fromJson(Map<String, dynamic> json) => _$SettingsConstraintsFromJson(json);
 }
+
+class AllowedValuesPayload {
+  final SettingsConstraints constraints;
+
+  AllowedValuesPayload(this.constraints);
+  factory AllowedValuesPayload.fromJson(Map<String, dynamic> json) {
+    var allowedValues = json['data']['constraints']['allowedvalues'] as List;
+    return AllowedValuesPayload(SettingsConstraints(allowedValues: allowedValues));
+  }
+}
