@@ -1,10 +1,10 @@
-import 'package:homeconnect/src/auth.dart';
-import 'package:homeconnect/src/client_dart.dart';
-import 'package:homeconnect/src/home_device.dart';
-import 'package:homeconnect/src/models/payloads/device_options.dart';
+import 'dart:io';
 
-const accessToken = "Your dev token";
-const refreshToken = "Your refresh token";
+import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/oauth/auth.dart';
+
+const accessToken = "";
+const refreshToken = "";
 
 class SandboxAuthorizer extends HomeConnectAuth {
   @override
@@ -30,29 +30,36 @@ void main() async {
     expirationDate: DateTime.now().add(Duration(days: 1)),
   ));
 
-  // print("init $api");
-  final res = await api.getDevices();
-  var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
-  selectedDevice = await api.getDevice(selectedDevice);
-  await selectedDevice.getPrograms();
-
-  print(selectedDevice.info.haId);
-  selectedDevice.programs.toList().forEach((element) {
-    print(element.key);
+  ProcessSignal.sigint.watch().listen((signal) {
+    print("Closing stream...");
+    api.closeEventChannel();
+    exit(0);
   });
-  await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
 
-  print(selectedDevice.selectedProgram.options);
-  for (var element in selectedDevice.selectedProgram.options) {
-    print(element.constraints!.toJson());
-    print(element.unit);
+  try {
+    final res = await api.getDevices();
+    var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
+    await selectedDevice.init();
+    selectedDevice.startListening();
+    await selectedDevice.getPrograms();
+    for (var element in selectedDevice.programs) {
+      print(element.key);
+    }
+    selectedDevice.startListening();
+    await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+
+    final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
+    final option2 = ProgramOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
+
+    selectedDevice.startProgram(options: [option1, option2]);
+    await Future.delayed(Duration(seconds: 5));
+    selectedDevice.stopProgram();
+
+    await Future.delayed(Duration(seconds: 5));
+    selectedDevice.turnOff();
+    await Future.delayed(Duration(seconds: 5));
+    selectedDevice.turnOn();
+  } catch (e) {
+    api.closeEventChannel();
   }
-
-  final option1 = DeviceOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
-  final option2 = DeviceOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
-
-  selectedDevice.startProgram(options: [option1, option2]);
-
-  await Future.delayed(Duration(seconds: 5));
-  selectedDevice.stopProgram();
 }

@@ -12,8 +12,7 @@ class DeviceInfo {
   final String enumber;
   final String haId;
 
-  DeviceInfo(this.name, this.brand, this.vib, this.connected, this.type,
-      this.enumber, this.haId);
+  DeviceInfo(this.name, this.brand, this.vib, this.connected, this.type, this.enumber, this.haId);
 
   static DeviceInfo empty() {
     return DeviceInfo('', '', '', false, DeviceType.oven, '', '');

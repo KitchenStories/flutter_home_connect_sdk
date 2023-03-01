@@ -1,23 +1,17 @@
 import 'dart:convert';
 
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/src/models/washer_device.dart';
+import 'package:homeconnect/oauth/auth.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
+import 'package:test/test.dart';
 
 class MyMockClass extends Mock implements MyClass {}
 
 class MockitoClient extends Mock implements http.Client {}
 
-class MockHomeConnectApi extends Mock implements HomeConnectApi {
-  @override
-  Future<void> startProgram(
-      {required String haid, required String programKey, required List<DeviceOptions> options}) async {
-    super.noSuchMethod(Invocation.method(#startProgram, [haid, options, programKey]), returnValue: Future.value());
-  }
-}
+class MockHomeConnectApi extends Mock implements HomeConnectApi {}
 
 class MyClass {}
 
@@ -111,7 +105,7 @@ void main() {
 
   DeviceInfo infoPayload = DeviceInfo.fromJson(info);
 
-  final device = DeviceOven.fromPayload(api, infoPayload, [], [], []);
+  final device = DeviceOven.fromPayload(api, infoPayload, [], [], [], []);
 
   group('Api test', () {
     test('get existing device', () async {
@@ -125,7 +119,7 @@ void main() {
     });
   });
 
-  group('Api device methods', () {
+  group('device methods', () {
     test('getDevices returns a list of HomeDevice', () async {
       final mockResponseBody = {
         "data": {
@@ -138,16 +132,6 @@ void main() {
               "vib": "HCS01OVN1",
               "haId": "BOSCH-HCS01OVN1-54E7EF9DEDBB",
               "enumber": "HCS01OVN1/03",
-              "connected": true,
-            },
-            {
-              "type": "Washer",
-              "id": "2",
-              "name": "Washer Simulator",
-              "brand": "BOSCH",
-              "vib": "HCS01WAS1",
-              "haId": "BOSCH-HCS01WAS1-54E7EF9DEDBB",
-              "enumber": "HCS01WAS1/03",
               "connected": true,
             }
           ]
@@ -162,9 +146,8 @@ void main() {
 
       final devices = await api.getDevices();
 
-      expect(devices.length, 2);
+      expect(devices.length, 1);
       expect(devices[0], isA<DeviceOven>());
-      expect(devices[1], isA<WasherDevice>());
     });
 
     test('getPrograms should return a list of DeviceProgram ', () async {
@@ -187,40 +170,11 @@ void main() {
 
       api.client = mockClient;
 
-      List<DeviceProgram> programs = await api.getPrograms(haId: 'validDeviceHaId');
+      List<DeviceProgram> programs = await device.getPrograms();
 
       expect(programs.length, 2);
       expect(programs[0].key, 'Cooking.Oven.Program.HeatingMode.HotAir');
       expect(programs[1].key, 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
-    });
-
-    test('getProgramOptions should return a DeviceOptions list and a constraint object', () async {
-      final mockResponseBody = {
-        "data": {
-          "options": [
-            {
-              "key": "Cooking.Oven.Option.SetpointTemperature",
-              "constraints": {
-                "min": 50,
-                "max": 250,
-                "step": 10,
-              }
-            },
-          ]
-        }
-      };
-
-      final mockClient = MockClient((request) async {
-        return http.Response(json.encode(mockResponseBody), 204);
-      });
-
-      api.client = mockClient;
-
-      List<DeviceOptions> options = await api.getProgramOptions(haId: 'validDeviceHaId', programKey: 'validProgramKey');
-
-      expect(options.length, 1);
-      expect(options[0].key, 'Cooking.Oven.Option.SetpointTemperature');
-      expect(options[0].constraints, isA<OptionConstraints>());
     });
 
     test('startProgram should not work with empty key', () async {
@@ -239,6 +193,7 @@ void main() {
           ),
           [],
           [],
+          [],
           []);
 
       final mockClient = MockClient((request) async {
@@ -252,7 +207,7 @@ void main() {
           () async => mockDevice.startProgram(
                 programKey: '',
                 options: [
-                  DeviceOptions.fromJson(
+                  ProgramOptions.fromJson(
                     {
                       "key": "Cooking.Oven.Option.SetpointTemperature",
                       "value": 200,
@@ -262,39 +217,6 @@ void main() {
                 ],
               ),
           throwsA(isA<Exception>()));
-    });
-
-    test('device.startProgram should call api.startProgram', () async {
-      final mockApi = MockHomeConnectApi();
-      final mockDevice = DeviceOven(
-          mockApi,
-          DeviceInfo.fromJson(
-            {
-              "name": "Oven Simulator",
-              "brand": "BOSCH",
-              "vib": "HCS01OVN1",
-              "connected": true,
-              "type": "Oven",
-              "enumber": "HCS01OVN1/03",
-              "haId": "haid"
-            },
-          ),
-          [],
-          [],
-          []);
-      final mockDeviceOptions = DeviceOptions.fromJson(
-        {
-          "key": "Cooking.Oven.Option.SetpointTemperature",
-          "value": 200,
-          "unit": "°C",
-        },
-      );
-      when(mockApi.startProgram(haid: "haid", programKey: "programKey", options: [mockDeviceOptions]))
-          .thenAnswer((_) async => http.Response('{}', 204));
-
-      mockDevice.startProgram(programKey: 'programKey', options: [mockDeviceOptions]);
-
-      verify(mockApi.startProgram(haid: 'haid', programKey: 'programKey', options: [mockDeviceOptions])).called(1);
     });
   });
 }

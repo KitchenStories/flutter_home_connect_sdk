@@ -8,7 +8,7 @@ part of 'device_status.dart';
 
 DeviceStatus _$DeviceStatusFromJson(Map<String, dynamic> json) => DeviceStatus(
       json['key'] as String,
-      json['value'] as String,
+      json['value'],
     );
 
 Map<String, dynamic> _$DeviceStatusToJson(DeviceStatus instance) =>

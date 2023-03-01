@@ -10,7 +10,7 @@ DeviceEvent _$DeviceEventFromJson(Map<String, dynamic> json) => DeviceEvent(
       json['level'] as String,
       json['handling'] as String,
       json['key'] as String,
-      json['value'] as String,
+      json['value'],
       json['uri'] as String,
     );
 

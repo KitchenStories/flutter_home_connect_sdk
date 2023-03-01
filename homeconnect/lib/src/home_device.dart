@@ -1,9 +1,7 @@
-import 'package:eventsource/eventsource.dart';
-import 'package:homeconnect/src/client_dart.dart';
-import 'package:homeconnect/src/models/payloads/device_info.dart';
-import 'package:homeconnect/src/models/payloads/device_options.dart';
-import 'package:homeconnect/src/models/payloads/device_program.dart';
-import 'package:homeconnect/src/models/payloads/device_status.dart';
+import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/src/models/event/device_event.dart';
+
+import 'models/settings/device_setting.dart';
 
 enum DeviceType { oven, coffeeMaker, dryer, washer, fridgeFreezer, dishwasher }
 
@@ -24,13 +22,9 @@ abstract class HomeDevice {
   final HomeConnectApi api;
   final DeviceInfo info;
   late DeviceProgram selectedProgram;
-  List<DeviceOptions> options;
   List<DeviceStatus> status;
   List<DeviceProgram> programs;
-
-  addOption(DeviceOptions option) {
-    options.add(option);
-  }
+  List<DeviceSetting> settings;
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
@@ -39,9 +33,22 @@ abstract class HomeDevice {
   String get deviceName => info.name;
   String get deviceHaId => info.haId;
 
-  HomeDevice(this.api, this.info, this.options, this.status, this.programs);
+  HomeDevice(this.api, this.info, this.status, this.programs, this.settings);
 
-  void updateStatusFromEvent(Event event);
+  /// Initializes the device
+  ///
+  /// Sets the [status] and [programs] properties for this device
+  /// by calling the [getPrograms] and [getStatus] methods.
+  Future<HomeDevice> init() async {
+    programs = await getPrograms();
+    status = await getStatus();
+    settings = await getSettings();
+    return this;
+  }
+
+  void updateStatusFromEvent({required List<DeviceEvent> eventData});
+
+  void updateSettingsFromEvent({required List<DeviceEvent> eventData});
 
   /// Selects a program to run on the selected home appliance
   /// [programKey] - the key of the program to select
@@ -56,6 +63,10 @@ abstract class HomeDevice {
   /// Trhows generic exception if the request fails.
   Future<List<DeviceProgram>> getPrograms();
 
+  Future<List<DeviceStatus>> getStatus();
+
+  Future<List<DeviceSetting>> getSettings();
+
   /// Starts the selected program
   ///
   /// If no program is selected, throws an exception.
@@ -65,7 +76,7 @@ abstract class HomeDevice {
   ///
   /// [options] - a list of options for the program, e.g. temperature, duration, etc.
   /// Trhows generic exception if the request fails.
-  void startProgram({String programKey, required List<DeviceOptions> options});
+  Future<void> startProgram({String programKey, required List<ProgramOptions> options});
 
   /// Stops the currently running program
   ///
@@ -78,9 +89,16 @@ abstract class HomeDevice {
   /// Turns off the selected home appliance
   void turnOff();
 
-  void listen() {
-    while (true) {
-      print('listening');
-    }
-  }
+  /// Starts listening for events from the selected home appliance
+  void startListening();
+
+  /// Stops listening for events from the selected home appliance
+  void stopListening();
+}
+
+// General data body used to update the status and settings of the device
+abstract class DeviceData {
+  final String key;
+  dynamic value;
+  DeviceData({required this.key, required this.value});
 }
