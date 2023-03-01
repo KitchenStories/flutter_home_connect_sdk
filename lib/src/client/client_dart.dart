@@ -6,13 +6,13 @@ import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/flutter_home_connect_sdk.dart';
 import 'package:flutter_home_connect_sdk/src/models/event/event_controller.dart';
 import 'package:http/http.dart' as http;
-
 import '../utils/uri.dart';
 
 class HomeConnectApi {
   late http.Client client;
   Uri baseUrl;
   String _accessToken = '';
+  EventController eventEmitter = EventController();
   late StreamSubscription<Event> subscription;
 
   /// oauth client credentials
@@ -119,7 +119,7 @@ class HomeConnectApi {
   Future<void> openEventListenerChannel({required HomeDevice source}) async {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    EventController eventController = EventController();
+    // EventController eventController = EventController();
     _accessToken = userCredentials!.accessToken;
 
     try {
@@ -128,7 +128,7 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
-        eventController.handleEvent(event, source);
+        eventEmitter.handleEvent(event, source);
       });
     } catch (e) {
       throw Exception("Event Source error: $e");

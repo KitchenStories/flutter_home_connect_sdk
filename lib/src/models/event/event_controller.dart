@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:eventify/eventify.dart' as eventify;
 import 'package:eventsource/eventsource.dart';
 import 'package:flutter_home_connect_sdk/src/models/event/device_event.dart';
 import 'package:flutter_home_connect_sdk/src/models/home_device.dart';
@@ -22,7 +23,7 @@ Map<EventType, List<EventFunction>> functionMap = {
   EventType.nil: [],
 };
 
-class EventController {
+class EventController extends eventify.EventEmitter {
   List<EventFunction> statusFunctions = [
     (event, source) => source.updateStatusFromEvent(
         eventData: (json.decode(event.data!)['items'] as List).map((e) => DeviceEvent.fromJson(e)).toList()),
@@ -45,9 +46,14 @@ class EventController {
 
   void handleEvent(Event event, HomeDevice source) {
     if (functionMap.containsKey(_eventTypeMap[event.event])) {
-      for (var element in functionMap[_eventTypeMap[event.event]]!) {
-        element(event, source);
+      for (var action in functionMap[_eventTypeMap[event.event]]!) {
+        action(event, source);
+        emit("update", event, event.data);
       }
     }
+  }
+
+  void addListener(eventify.EventCallback callback) {
+    on("update", this, callback);
   }
 }
