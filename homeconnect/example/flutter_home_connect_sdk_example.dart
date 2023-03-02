@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/oauth/auth.dart';
 
 const accessToken = "";
 const refreshToken = "";
@@ -45,7 +44,6 @@ void main() async {
     for (var element in selectedDevice.programs) {
       print(element.key);
     }
-    selectedDevice.startListening();
     await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
 
     final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);

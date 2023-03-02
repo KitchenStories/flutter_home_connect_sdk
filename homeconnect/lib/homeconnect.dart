@@ -12,8 +12,8 @@ export 'src/models/info/device_info.dart';
 export 'src/models/devices/oven_device.dart';
 export 'src/models/event/event_controller.dart';
 export 'src/home_device.dart';
-export 'client/client_dart.dart';
-export 'oauth/auth.dart';
+export 'src/client/client_dart.dart';
+export 'src/oauth/auth.dart';
 
 
 // TODO: Export any libraries intended for clients of this package.

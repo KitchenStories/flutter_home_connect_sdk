@@ -119,7 +119,7 @@ class HomeConnectApi {
   Future<void> openEventListenerChannel({required HomeDevice source}) async {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    EventController eventController = EventController();
+    // EventController eventController = EventController();
     _accessToken = userCredentials!.accessToken;
 
     try {
@@ -128,7 +128,7 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
-        eventController.handleEvent(event, source);
+        eventEmitter.handleEvent(event, source);
       });
     } catch (e) {
       throw Exception("Event Source error: $e");
