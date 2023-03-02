@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/oauth/auth.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;

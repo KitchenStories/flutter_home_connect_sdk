@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:homeconnect/oauth/oauth_token.dart';
-import 'package:homeconnect/src/utils/uri.dart';
 import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
+import '../utils/uri.dart';
+import './oauth_token.dart';
 import 'auth_exceptions.dart';
 
 class HomeConnectAuthCredentials {
