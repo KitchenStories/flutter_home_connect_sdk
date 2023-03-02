@@ -46,8 +46,6 @@ class EventController extends eventify.EventEmitter {
   void handleEvent(Event event, HomeDevice source) {
     if (functionMap.containsKey(_eventTypeMap[event.event])) {
       for (var action in functionMap[_eventTypeMap[event.event]]!) {
-        print("calling action for ${event.event}");
-        print("event data: ${event.data}");
         action(event, source);
         emit("update", event, event.data);
       }
@@ -55,7 +53,6 @@ class EventController extends eventify.EventEmitter {
   }
 
   void addListener(eventify.EventCallback callback) {
-    print("adding listener");
     on("update", this, callback);
   }
 }
