@@ -4,13 +4,12 @@ import 'dart:core';
 
 import 'package:eventsource/eventsource.dart';
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/oauth/auth.dart';
-import 'package:homeconnect/src/models/event/event_controller.dart';
 import 'package:homeconnect/src/utils/uri.dart';
 
 import 'package:http/http.dart' as http;
 
 class HomeConnectApi {
+  EventController eventEmitter = EventController();
   late http.Client client;
   Uri baseUrl;
   String _accessToken = '';
