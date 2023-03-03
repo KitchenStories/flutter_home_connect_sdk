@@ -1,9 +1,9 @@
 # Home Connect SDK
-This library is a work in progress sdk for [Homme Connect](https://www.home-connect.com/us/en) api.
+This library is a work in progress sdk for [Home Connect](https://www.home-connect.com/us/en) api.
 
 
 ## Setup
-- Get your account and access token from [here](https://api-docs.home-connect.com/quickstart?).
+- Get your account and access token [here](https://api-docs.home-connect.com/quickstart?).
 - Import the package in your flutter app.
 
 
