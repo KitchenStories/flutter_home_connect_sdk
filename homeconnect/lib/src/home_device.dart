@@ -43,7 +43,6 @@ abstract class HomeDevice {
     programs = await getPrograms();
     status = await getStatus();
     settings = await getSettings();
-    startListening();
     return this;
   }
 
