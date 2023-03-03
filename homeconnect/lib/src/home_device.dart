@@ -1,3 +1,5 @@
+import 'package:eventify/eventify.dart';
+
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
 
@@ -47,13 +49,22 @@ abstract class HomeDevice {
     return this;
   }
 
+  /// Updates the device status from the provided [eventData]
   void updateStatusFromEvent({required List<DeviceEvent> eventData});
 
+  /// Updates the device settings from the provided [eventData]
   void updateSettingsFromEvent({required List<DeviceEvent> eventData});
 
+  /// Updates the device programs from the provided [eventData]
+  void updateProgramOptionsFromEvent({required List<DeviceEvent> eventData});
+
+  /// Updates the device active program from the provided [eventData]
+  void updateActiveProgramFromEvent({required List<DeviceEvent> eventData});
+
   /// Selects a program to run on the selected home appliance
+  ///
   /// [programKey] - the key of the program to select
-  /// Trhows generic exception if the request fails.
+  /// Trhows ProgramsException if no program is selected.
   Future<void> selectProgram({required String programKey});
 
   /// Gets the list of programs available for the selected home appliance
@@ -61,11 +72,24 @@ abstract class HomeDevice {
   /// Returns a list of [DeviceProgram] objects.
   ///
   /// Sets the [programs] property to the list of programs.
-  /// Trhows generic exception if the request fails.
+  /// Trhows [ProgramsException] if the request fails.
   Future<List<DeviceProgram>> getPrograms();
 
+  /// Gets the list of status for the selected home appliance
+  ///
+  /// Returns a list of [DeviceStatus] objects.
+  ///
+  /// Sets the [status] property to the list of status.
+  /// Throws [StatusException] if the request fails.
   Future<List<DeviceStatus>> getStatus();
 
+  /// Gets the list of settings for the selected home appliance
+  ///
+  /// Returns a list of [DeviceSetting] objects.
+  ///
+  /// Sets the [settings] property to the list of settings.
+  ///
+  /// Throws [SettingsException] if the request fails.
   Future<List<DeviceSetting>> getSettings();
 
   /// Starts the selected program
@@ -95,6 +119,13 @@ abstract class HomeDevice {
 
   /// Stops listening for events from the selected home appliance
   void stopListening();
+
+  /// Adds a callback to the event listener
+  ///
+  /// Before adding a callback we need to use startListening() to start listening for events.
+  /// [callback] - the callback to add, needs to be of type [EventCallback]
+  /// Trhows EventsException if the event listener is not initialized.
+  void addCallbackToListener({required EventCallback callback});
 }
 
 // General data body used to update the status and settings of the device
