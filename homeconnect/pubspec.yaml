@@ -1,5 +1,5 @@
 name: homeconnect
-description: A starting point for Dart libraries or applications.
+description: Dart SDK for the home connect API.
 version: 0.0.1
 homepage: https://github.com/KitchenStories/flutter_home_connect_sdk/tree/main/homeconnect
 

@@ -1,6 +1,6 @@
 name: homeconnect_flutter
-description: A starting point for Dart libraries or applications.
-version: 0.0.1
+description: Flutter classes to be used with the home connect SDK
+version: 0.0.2
 homepage: https://github.com/KitchenStories/flutter_home_connect_sdk/tree/main/homeconnect_flutter
 
 environment:
