@@ -16,3 +16,14 @@ class DeviceEvent {
 
   factory DeviceEvent.fromJson(Map<String, dynamic> json) => _$DeviceEventFromJson(json);
 }
+
+class EventDataListPayload {
+  final List<DeviceEvent> events;
+
+  EventDataListPayload(this.events);
+
+  factory EventDataListPayload.fromJson(Map<String, dynamic> json) {
+    final items = (json['items'] as List).map((e) => DeviceEvent.fromJson(e)).toList();
+    return EventDataListPayload(items);
+  }
+}
