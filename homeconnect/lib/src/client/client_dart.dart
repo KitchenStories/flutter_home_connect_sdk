@@ -119,7 +119,6 @@ class HomeConnectApi {
   Future<void> openEventListenerChannel({required HomeDevice source}) async {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    // EventController eventController = EventController();
     _accessToken = userCredentials!.accessToken;
 
     try {
