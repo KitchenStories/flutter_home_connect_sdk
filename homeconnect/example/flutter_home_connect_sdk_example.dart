@@ -39,24 +39,29 @@ void main() async {
     final res = await api.getDevices();
     var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
     await selectedDevice.init();
-    selectedDevice.startListening();
-    await selectedDevice.getPrograms();
-    for (var element in selectedDevice.programs) {
-      print(element.key);
+    try {
+      selectedDevice.addCallbackToListener(callback: (ev, obj) {
+        print(ev.eventData);
+      });
+    } catch (e) {
+      print(e);
     }
-    await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+    // for (var element in selectedDevice.programs) {
+    //   print(element.key);
+    // }
+    // await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
 
     final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
     final option2 = ProgramOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
 
-    selectedDevice.startProgram(options: [option1, option2]);
-    await Future.delayed(Duration(seconds: 5));
-    selectedDevice.stopProgram();
+    // selectedDevice.startProgram(options: [option1, option2]);
+    // await Future.delayed(Duration(seconds: 5));
+    // selectedDevice.stopProgram();
 
-    await Future.delayed(Duration(seconds: 5));
-    selectedDevice.turnOff();
-    await Future.delayed(Duration(seconds: 5));
-    selectedDevice.turnOn();
+    // await Future.delayed(Duration(seconds: 5));
+    // selectedDevice.turnOff();
+    // await Future.delayed(Duration(seconds: 5));
+    // selectedDevice.turnOn();
   } catch (e) {
     api.closeEventChannel();
   }
