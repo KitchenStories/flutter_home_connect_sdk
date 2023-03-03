@@ -1,5 +1,4 @@
-import 'package:homeconnect/oauth/auth.dart';
-import 'package:homeconnect/oauth/oauth_token.dart';
+import 'package:homeconnect/homeconnect.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

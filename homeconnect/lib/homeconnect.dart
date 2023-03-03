@@ -1,6 +1,3 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
 library homeconnect;
 
 export 'src/models/settings/settings_enums.dart';
@@ -11,7 +8,7 @@ export 'src/models/status/device_status.dart';
 export 'src/models/info/device_info.dart';
 export 'src/models/devices/oven_device.dart';
 export 'src/home_device.dart';
-export 'client/client_dart.dart';
-
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/client/client_dart.dart';
+export 'src/oauth/auth.dart';
+export 'src/oauth/auth_exceptions.dart';
+export 'src/oauth/oauth_token.dart';

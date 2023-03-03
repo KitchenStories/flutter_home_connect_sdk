@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/oauth/auth.dart';
 
 const accessToken = "";
 const refreshToken = "";
