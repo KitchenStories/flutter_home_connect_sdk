@@ -1,5 +1,5 @@
-import 'package:homeconnect/oauth/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:homeconnect/homeconnect.dart';
 import 'components/webview_login.dart' show showLogin;
 
 class HomeConnectOauth extends HomeConnectAuth {
