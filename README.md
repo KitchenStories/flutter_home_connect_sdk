@@ -130,7 +130,7 @@ await selectedDevice.startProgram(options: [tempOption, durationOption]);
 
 ## Other methods.
 
-HomeDevice class also allows you to turn off on on your device.
+HomeDevice class also allows you to turn off and on your device.
 
 ```dart
 selectedDevice.turnOff();
