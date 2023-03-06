@@ -13,7 +13,7 @@ Add the following dependency to your `pubspec.yaml` file:
 yaml
 
     dependencies:
-    homeconnect: ^0.0.1
+    homeconnect: ^0.0.2
 
 Then, run `dart pub get` to install the package.
 
