@@ -1,5 +1,5 @@
 name: homeconnect_flutter
-description: Flutter classes to be used with the home connect SDK
+description: Flutter utility classes, meant to be used with the home connect SDK
 version: 0.0.2
 homepage: https://github.com/KitchenStories/flutter_home_connect_sdk/tree/main/homeconnect_flutter
 
