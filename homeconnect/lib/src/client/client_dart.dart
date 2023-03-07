@@ -1,18 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
-
 import 'package:eventsource/eventsource.dart';
 import 'package:homeconnect/homeconnect.dart';
-
-import 'package:homeconnect/src/models/event/event_controller.dart';
-
 import 'package:homeconnect/src/utils/uri.dart';
-
 import 'package:http/http.dart' as http;
 
 class HomeConnectApi {
-
   EventController eventEmitter = EventController();
 
   late http.Client client;
@@ -133,9 +127,7 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
-
         eventEmitter.handleEvent(event, source);
-
       });
     } catch (e) {
       throw Exception("Event Source error: $e");
