@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:eventify/eventify.dart';
+import 'package:eventify/eventify.dart' show EventEmitter, EventCallback, Listener;
+import 'package:eventsource/eventsource.dart' show Event;
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/src/models/devices/device_exceptions.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
@@ -21,8 +22,12 @@ mixin ActiveOvenStatus {
 }
 
 class DeviceOven extends HomeDevice with ActiveOvenStatus {
-  DeviceOven(HomeConnectApi api, DeviceInfo info, List<ProgramOptions> options, List<DeviceStatus> status,
-      List<DeviceProgram> programs, List<DeviceSetting> settings)
+  DeviceOven(
+    HomeConnectApi api,
+    DeviceInfo info,
+    List<ProgramOptions> options,
+    List<DeviceStatus> status,
+    List<DeviceProgram> programs, List<DeviceSetting> settings)
       : super(api, info, status, programs, settings);
 
   factory DeviceOven.fromPayload(HomeConnectApi api, DeviceInfo info, List<ProgramOptions> options,
@@ -153,6 +158,8 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
   @override
   void updateNotifyProgramOptionsFromEvent({required List<DeviceEvent> eventData}) {
     _updateValues(eventData: eventData, data: notifyProgramOptions);
+    emitter.emit("notify", this, eventData);
+    emitter.emit("global", this, eventData);
   }
 
   @override
@@ -181,6 +188,11 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
     } catch (e) {
       throw Exception("Something went wrong: $e");
     }
+  }
+
+  @override
+  void handleEvent(Event event) {
+    print(event.event);
   }
 
   void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {

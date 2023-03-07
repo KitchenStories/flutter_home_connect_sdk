@@ -127,7 +127,8 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
-        eventEmitter.handleEvent(event, source);
+        //eventEmitter.handleEvent(event, source);
+        source.handleEvent(event);
       });
     } catch (e) {
       throw Exception("Event Source error: $e");

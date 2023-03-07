@@ -1,4 +1,5 @@
-import 'package:eventify/eventify.dart';
+import 'package:eventify/eventify.dart' show EventEmitter, EventCallback, Listener;
+import 'package:eventsource/eventsource.dart' show Event;
 
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
@@ -16,6 +17,7 @@ Map<String, DeviceType> deviceTypeMap = {
   "Dishwasher": DeviceType.dishwasher
 };
 
+
 /// Base class for home devices
 ///
 /// Contains the shared functionality for all appliances.
@@ -27,6 +29,8 @@ abstract class HomeDevice {
   List<DeviceStatus> status;
   List<DeviceProgram> programs;
   List<DeviceSetting> settings;
+  EventEmitter emitter = EventEmitter();
+  List<Listener> listeners = [];
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
@@ -125,6 +129,22 @@ abstract class HomeDevice {
   /// [callback] - the callback to add, needs to be of type [EventCallback]
   /// Trhows EventsException if the event listener is not initialized.
   void addCallbackToListener({required EventCallback callback});
+
+  void handleEvent(Event event);
+
+  Listener addListener({required EventCallback callback, EventType type}) {
+    final listener = emitter.on('status', this, callback);
+    listeners.add(listener);
+    emitter.emit('event');
+    return listener;
+  }
+
+  void removeListener({required EventCallback callback}) {
+    final listener = listeners.firstWhere((element) => element.callback == callback);
+    emitter.removeAllByCallback(callback);
+    //emitter.off(listener);
+    listeners.remove(listener);
+  }
 }
 
 // General data body used to update the status and settings of the device
