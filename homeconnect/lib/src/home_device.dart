@@ -45,7 +45,6 @@ abstract class HomeDevice {
     programs = await getPrograms();
     status = await getStatus();
     settings = await getSettings();
-    startListening();
     return this;
   }
 
@@ -56,10 +55,10 @@ abstract class HomeDevice {
   void updateSettingsFromEvent({required List<DeviceEvent> eventData});
 
   /// Updates the device programs from the provided [eventData]
-  void updateProgramOptionsFromEvent({required List<DeviceEvent> eventData});
+  void updateSelectedProgramFromEvent({required List<DeviceEvent> eventData});
 
   /// Updates the device active program from the provided [eventData]
-  void updateActiveProgramFromEvent({required List<DeviceEvent> eventData});
+  void updateNotifyProgramOptionsFromEvent({required List<DeviceEvent> eventData});
 
   /// Selects a program to run on the selected home appliance
   ///
