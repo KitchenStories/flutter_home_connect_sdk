@@ -1,4 +1,4 @@
-# HomeConnectApi
+# Home Connect SDK
 
 A Dart package for interacting with the Home Connect API, which provides a unified interface for controlling a variety of smart home appliances.
 Getting started

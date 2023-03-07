@@ -4,12 +4,17 @@ import 'dart:core';
 
 import 'package:eventsource/eventsource.dart';
 import 'package:homeconnect/homeconnect.dart';
+
+import 'package:homeconnect/src/models/event/event_controller.dart';
+
 import 'package:homeconnect/src/utils/uri.dart';
 
 import 'package:http/http.dart' as http;
 
 class HomeConnectApi {
+
   EventController eventEmitter = EventController();
+
   late http.Client client;
   Uri baseUrl;
   String _accessToken = '';
@@ -119,6 +124,7 @@ class HomeConnectApi {
   Future<void> openEventListenerChannel({required HomeDevice source}) async {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+
     _accessToken = userCredentials!.accessToken;
 
     try {
@@ -127,7 +133,9 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
+
         eventEmitter.handleEvent(event, source);
+
       });
     } catch (e) {
       throw Exception("Event Source error: $e");

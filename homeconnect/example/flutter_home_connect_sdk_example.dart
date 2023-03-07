@@ -13,6 +13,7 @@ class SandboxAuthorizer extends HomeConnectAuth {
 }
 
 void main() async {
+  // set up the api
   HomeConnectApi api = HomeConnectApi(
     Uri.parse('https://simulator.home-connect.com/'),
     credentials: HomeConnectClientCredentials(
@@ -29,6 +30,7 @@ void main() async {
     expirationDate: DateTime.now().add(Duration(days: 1)),
   ));
 
+  // close stream on exit
   ProcessSignal.sigint.watch().listen((signal) {
     print("Closing stream...");
     api.closeEventChannel();
@@ -36,10 +38,17 @@ void main() async {
   });
 
   try {
+    // get all devices
     final res = await api.getDevices();
-    var selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
+    // select the first oven
+    final selectedDevice = res.firstWhere((element) => element.info.type == DeviceType.oven);
+
+    // initialize the device, this fetches all available programs and status
     await selectedDevice.init();
+
+    // devices listen to events, we need to open a stream to receive them
     selectedDevice.startListening();
+
     try {
       // selectedDevice.addCallbackToListener(callback: (ev, obj) {
       //   print("from callback ${ev.eventData}");
@@ -63,7 +72,9 @@ void main() async {
     // selectedDevice.turnOff();
     // await Future.delayed(Duration(seconds: 5));
     // selectedDevice.turnOn();
+
   } catch (e) {
+    // close the stream on error
     api.closeEventChannel();
   }
 }

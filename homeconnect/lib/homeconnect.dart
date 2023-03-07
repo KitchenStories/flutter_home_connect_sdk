@@ -1,6 +1,3 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
 library homeconnect;
 
 export 'src/models/settings/settings_enums.dart';
@@ -16,4 +13,6 @@ export 'src/client/client_dart.dart';
 export 'src/oauth/auth.dart';
 
 
+
 // TODO: Export any libraries intended for clients of this package.
+

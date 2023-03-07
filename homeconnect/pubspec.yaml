@@ -1,7 +1,7 @@
 name: homeconnect
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# homepage: https://www.example.com
+description: HomeConnectApi is a Dart package that provides a client for the Home Connect API, allowing users to interact with their home appliances. It supports authentication, CRUD operations, event subscriptions, and more. 
+version: 0.0.2
+homepage: https://github.com/KitchenStories/flutter_home_connect_sdk/tree/main/homeconnect
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
