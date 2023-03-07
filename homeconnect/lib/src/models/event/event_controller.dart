@@ -4,7 +4,7 @@ import 'package:eventsource/eventsource.dart';
 import 'package:homeconnect/src/home_device.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
 
-enum EventType { notify, status, event, keepAlive, nil }
+enum EventType { notify, status, event, keepAlive, nil, conected, disconected }
 
 typedef EventFunction = void Function(Event event, HomeDevice source);
 
@@ -14,6 +14,8 @@ Map<String, EventType> _eventTypeMap = {
   'KEEP-ALIVE': EventType.keepAlive,
   'null': EventType.nil,
   'EVENT': EventType.event,
+  'CONNECTED': EventType.conected,
+  'DISCONNECTED': EventType.disconected,
 };
 
 Map<EventType, List<EventFunction>> functionMap = {
@@ -21,11 +23,12 @@ Map<EventType, List<EventFunction>> functionMap = {
   EventType.notify: [],
   EventType.keepAlive: [],
   EventType.nil: [],
+  EventType.conected: [],
+  EventType.disconected: [],
+  EventType.event: [],
 };
 
 class EventController extends eventify.EventEmitter {
-  bool isListening = false;
-
   /// List of functions to be called when a status event is received
   ///
   /// Status events are sent when the status of a device changes, for example when the door is opened or closed.
@@ -42,27 +45,33 @@ class EventController extends eventify.EventEmitter {
   List<EventFunction> notifyFunctions = [
     (event, source) =>
         source.updateSettingsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
-    (event, source) =>
-        source.updateProgramOptionsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
-    (event, source) =>
-        source.updateActiveProgramFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
+    (event, source) => source.updateNotifyProgramOptionsFromEvent(
+        eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
+    (event, source) => source.updateSelectedProgramFromEvent(
+        eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
   ];
 
   List<EventFunction> keepAliveFunctions = [];
 
   List<EventFunction> nilFunctions = [];
 
-  List<EventFunction> eventFunction = [(event, source) => {}];
+  List<EventFunction> eventFunction = [];
+
+  List<EventFunction> placeHolderFunctions = [
+    (event, source) => print("Placeholder callback from: ${source.deviceName}"),
+    (event, source) => print("Trigger event:  ${event.event}"),
+  ];
 
   EventController() {
     functionMap[EventType.status] = statusFunctions;
     functionMap[EventType.notify] = notifyFunctions;
-    functionMap[EventType.keepAlive] = keepAliveFunctions;
-    functionMap[EventType.event] = eventFunction;
+    functionMap[EventType.keepAlive] = placeHolderFunctions;
+    functionMap[EventType.event] = placeHolderFunctions;
+    functionMap[EventType.conected] = placeHolderFunctions;
+    functionMap[EventType.disconected] = placeHolderFunctions;
   }
 
   void handleEvent(Event event, HomeDevice source) {
-    isListening = true;
     if (functionMap.containsKey(_eventTypeMap[event.event])) {
       for (var action in functionMap[_eventTypeMap[event.event]]!) {
         action(event, source);
