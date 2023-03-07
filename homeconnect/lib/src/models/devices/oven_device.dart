@@ -9,11 +9,13 @@ import 'package:homeconnect/src/models/settings/constraints/setting_constraints.
 import 'package:homeconnect/src/models/settings/device_setting.dart';
 
 mixin ActiveOvenStatus {
-  List<ProgramOptions> activeProgramOptions = [
+  List<ProgramOptions> notifyProgramOptions = [
     ProgramOptions('BSH.Common.Option.RemainingProgramTime', 'integer', 'seconds', 0, null),
     ProgramOptions("BSH.Common.Option.Duration", "integer", "seconds", 0, null),
     ProgramOptions('BSH.Common.Option.ElapsedProgramTime', 'integer', 'seconds', 0, null),
     ProgramOptions('BSH.Common.Option.ProgramProgress', 'integer', "%", 0, null),
+    ProgramOptions('BSH.Common.Root.SelectedProgram', 'string', '', 0, null),
+    ProgramOptions('BSH.Common.Root.ActiveProgram', 'string', '', 0, null),
     ProgramOptions('Cooking.Oven.Status.CurrentCavityTemperature', 'integer', "°C", 0, null),
   ];
 }
@@ -144,13 +146,13 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
   }
 
   @override
-  void updateProgramOptionsFromEvent({required List<DeviceEvent> eventData}) {
+  void updateSelectedProgramFromEvent({required List<DeviceEvent> eventData}) {
     _updateValues(eventData: eventData, data: selectedProgram.options);
   }
 
   @override
-  void updateActiveProgramFromEvent({required List<DeviceEvent> eventData}) {
-    _updateValues(eventData: eventData, data: activeProgramOptions);
+  void updateNotifyProgramOptionsFromEvent({required List<DeviceEvent> eventData}) {
+    _updateValues(eventData: eventData, data: notifyProgramOptions);
   }
 
   @override
@@ -245,9 +247,6 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
 
   @override
   void addCallbackToListener({required EventCallback callback}) {
-    if (!api.eventEmitter.isListening) {
-      throw EventsException("Event emitter is down, please call startListening() first");
-    }
     api.eventEmitter.addListener(callback);
   }
 }
