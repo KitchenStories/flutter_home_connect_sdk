@@ -8,6 +8,7 @@ export 'src/models/status/device_status.dart';
 export 'src/models/info/device_info.dart';
 export 'src/models/devices/oven_device.dart';
 export 'src/models/event/event_controller.dart';
+export 'src/models/event/device_event.dart';
 export 'src/home_device.dart';
 export 'src/client/client_dart.dart';
 export 'src/oauth/auth.dart';
