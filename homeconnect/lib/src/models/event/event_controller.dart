@@ -35,8 +35,8 @@ class EventController extends eventify.EventEmitter {
   List<EventFunction> statusFunctions = [
     (event, source) =>
         source.updateStatusFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
-    (event, source) =>
-        source.updatePowerSettingsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
+    (event, source) => source.emitEvent(
+        type: EventType.status, eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
   ];
 
   /// List of functions to be called when a notify event is received
@@ -44,11 +44,13 @@ class EventController extends eventify.EventEmitter {
   /// Notify events are sent when the settings of a device change, for example when the temperature is changed.
   List<EventFunction> notifyFunctions = [
     (event, source) =>
-        source.updateSettingsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
+        source.updatePowerSettingsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
     (event, source) => source.updateNotifyProgramOptionsFromEvent(
         eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
     (event, source) => source.updateSelectedProgramFromEvent(
         eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
+    (event, source) => source.emitEvent(
+        type: EventType.notify, eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
   ];
 
   List<EventFunction> keepAliveFunctions = [];
