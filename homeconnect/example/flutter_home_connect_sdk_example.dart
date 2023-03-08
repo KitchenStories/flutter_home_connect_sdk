@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:homeconnect/homeconnect.dart';
 
-const accessToken = "";
+const accessToken =
+    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjE5IiwieC1yZWciOiJTSU0iLCJ4LWVudiI6IlBSRCJ9.eyJzdWIiOiJkZXZwb3J0YWxVc2VySWQ6NDYwMzIiLCJleHAiOjE2NzgzMzY5NzAsInNjb3BlIjpbIkNsZWFuaW5nUm9ib3QiLCJDbGVhbmluZ1JvYm90LUNvbnRyb2wiLCJDbGVhbmluZ1JvYm90LU1vbml0b3IiLCJDbGVhbmluZ1JvYm90LVNldHRpbmdzIiwiQ29mZmVlTWFrZXIiLCJDb2ZmZWVNYWtlci1Db250cm9sIiwiQ29mZmVlTWFrZXItTW9uaXRvciIsIkNvZmZlZU1ha2VyLVNldHRpbmdzIiwiQ29udHJvbCIsIkNvb2tQcm9jZXNzb3IiLCJDb29rUHJvY2Vzc29yLUNvbnRyb2wiLCJDb29rUHJvY2Vzc29yLU1vbml0b3IiLCJDb29rUHJvY2Vzc29yLVNldHRpbmdzIiwiRGlzaHdhc2hlciIsIkRpc2h3YXNoZXItQ29udHJvbCIsIkRpc2h3YXNoZXItTW9uaXRvciIsIkRpc2h3YXNoZXItU2V0dGluZ3MiLCJEcnllciIsIkRyeWVyLUNvbnRyb2wiLCJEcnllci1Nb25pdG9yIiwiRHJ5ZXItU2V0dGluZ3MiLCJGcmVlemVyIiwiRnJlZXplci1Db250cm9sIiwiRnJlZXplci1Nb25pdG9yIiwiRnJlZXplci1TZXR0aW5ncyIsIkZyaWRnZUZyZWV6ZXItQ29udHJvbCIsIkZyaWRnZUZyZWV6ZXItTW9uaXRvciIsIkZyaWRnZUZyZWV6ZXItU2V0dGluZ3MiLCJIb2IiLCJIb2ItQ29udHJvbCIsIkhvYi1Nb25pdG9yIiwiSG9iLVNldHRpbmdzIiwiSG9vZCIsIkhvb2QtQ29udHJvbCIsIkhvb2QtTW9uaXRvciIsIkhvb2QtU2V0dGluZ3MiLCJJZGVudGlmeUFwcGxpYW5jZSIsIk1vbml0b3IiLCJPdmVuIiwiT3Zlbi1Db250cm9sIiwiT3Zlbi1Nb25pdG9yIiwiT3Zlbi1TZXR0aW5ncyIsIlJlZnJpZ2VyYXRvciIsIlJlZnJpZ2VyYXRvci1Db250cm9sIiwiUmVmcmlnZXJhdG9yLU1vbml0b3IiLCJSZWZyaWdlcmF0b3ItU2V0dGluZ3MiLCJTZXR0aW5ncyIsIldhc2hlciIsIldhc2hlci1Db250cm9sIiwiV2FzaGVyLU1vbml0b3IiLCJXYXNoZXItU2V0dGluZ3MiLCJXYXNoZXJEcnllciIsIldhc2hlckRyeWVyLUNvbnRyb2wiLCJXYXNoZXJEcnllci1Nb25pdG9yIiwiV2FzaGVyRHJ5ZXItU2V0dGluZ3MiLCJXaW5lQ29vbGVyIiwiV2luZUNvb2xlci1Db250cm9sIiwiV2luZUNvb2xlci1Nb25pdG9yIiwiV2luZUNvb2xlci1TZXR0aW5ncyJdLCJhenAiOiI1NzQxRTVBMENCQjlDQ0U0Q0RFNUFBNkJGREJEQjVFNjRBMzQzMjVBMzI5RTA5MUY2ODY5NzU0MTY4NjA1RUU0IiwiYXVkIjoiNTc0MUU1QTBDQkI5Q0NFNENERTVBQTZCRkRCREI1RTY0QTM0MzI1QTMyOUUwOTFGNjg2OTc1NDE2ODYwNUVFNCIsInBybSI6W10sImlzcyI6ImV1OnNpbTpvYXV0aDoxIiwianRpIjoiYmZiYTMzNTYtNDc1Ni00MGQwLWFiOTUtM2Y3OGM3OWVhNzQwIiwiaWF0IjoxNjc4MjUwNTcwfQ.SVcdzLeWXwYvQfKuz9uG36kyPKrFlbSSThePBb9CSW_FPdEVyJRTa0gNl5SW_gfsIwrq9JtRyXafIs-R7c0AzQ";
 const refreshToken = "";
 
 class SandboxAuthorizer extends HomeConnectAuth {
@@ -49,6 +50,31 @@ void main() async {
     // devices listen to events, we need to open a stream to receive them
     selectedDevice.startListening();
 
+    notifyCallback(ev, obj) {
+      print("from notify callback ${ev.eventData.first.key}");
+      print("from notify callback ${ev.eventData.first.value}");
+    }
+
+    statusCallback(ev, obj) {
+      print("from status callback ${ev.eventData.first.key}");
+      print("from status callback ${ev.eventData.first.value}");
+    }
+
+    eventCallback(ev, ob) {
+      print("from event callback ${ob.info.name}");
+    }
+
+    // selectedDevice.addListener(eventName: EventType.notify, callback: testCallback);
+    selectedDevice.onNotify(callback: notifyCallback);
+
+    selectedDevice.onStatus(callback: statusCallback);
+
+    selectedDevice.onEvent(callback: eventCallback);
+
+    await Future.delayed(Duration(seconds: 10));
+
+    // selectedDevice.removeListener(listener: selectedDevice.listeners.first);
+
     try {
       // selectedDevice.addCallbackToListener(callback: (ev, obj) {
       //   print("from callback ${ev.eventData}");
@@ -72,7 +98,6 @@ void main() async {
     // selectedDevice.turnOff();
     // await Future.delayed(Duration(seconds: 5));
     // selectedDevice.turnOn();
-
   } catch (e) {
     // close the stream on error
     api.closeEventChannel();
