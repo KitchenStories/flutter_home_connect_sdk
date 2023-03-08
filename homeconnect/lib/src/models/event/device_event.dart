@@ -1,3 +1,4 @@
+import 'package:eventify/eventify.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'device_event.g.dart';
@@ -15,6 +16,16 @@ class DeviceEvent {
   Map<String, dynamic> toJson() => _$DeviceEventToJson(this);
 
   factory DeviceEvent.fromJson(Map<String, dynamic> json) => _$DeviceEventFromJson(json);
+
+  static List<DeviceEvent> toEventList(Event ev) {
+    if (ev.eventData is List<DeviceEvent>) {
+      return ev.eventData as List<DeviceEvent>;
+    } else if (ev.eventData is DeviceEvent) {
+      return [ev.eventData as DeviceEvent];
+    } else {
+      return [];
+    }
+  }
 }
 
 class EventDataListPayload {
