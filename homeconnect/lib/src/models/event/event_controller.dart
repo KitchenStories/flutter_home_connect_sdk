@@ -36,7 +36,7 @@ class EventController extends eventify.EventEmitter {
     (event, source) =>
         source.updateStatusFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
     (event, source) =>
-        source.updateSettingsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
+        source.updatePowerSettingsFromEvent(eventData: EventDataListPayload.fromJson(json.decode(event.data!)).events),
   ];
 
   /// List of functions to be called when a notify event is received
@@ -58,7 +58,7 @@ class EventController extends eventify.EventEmitter {
   List<EventFunction> eventFunction = [];
 
   List<EventFunction> placeHolderFunctions = [
-    (event, source) => print("Placeholder callback from: ${source.deviceName}"),
+    (event, source) => print("Incoming event from: ${source.deviceName}"),
     (event, source) => print("Trigger event:  ${event.event}"),
   ];
 
@@ -75,12 +75,8 @@ class EventController extends eventify.EventEmitter {
     if (functionMap.containsKey(_eventTypeMap[event.event])) {
       for (var action in functionMap[_eventTypeMap[event.event]]!) {
         action(event, source);
-        emit("update", event, event.data);
+        // emit("update", event, event.data);
       }
     }
-  }
-
-  void addListener(eventify.EventCallback callback) {
-    on("update", this, callback);
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:eventify/eventify.dart';
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/src/models/devices/device_exceptions.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
@@ -138,21 +137,31 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
   @override
   void updateStatusFromEvent({required List<DeviceEvent> eventData}) {
     _updateValues(eventData: eventData, data: status);
+    eventEmitter.emit(EventType.status.name, this, eventData);
+  }
+
+  @override
+  void updatePowerSettingsFromEvent({required List<DeviceEvent> eventData}) {
+    _updateValues(eventData: eventData, data: settings);
+    eventEmitter.emit('power', this, eventData);
   }
 
   @override
   void updateSettingsFromEvent({required List<DeviceEvent> eventData}) {
     _updateValues(eventData: eventData, data: settings);
+    eventEmitter.emit(EventType.notify.name, this, eventData);
   }
 
   @override
   void updateSelectedProgramFromEvent({required List<DeviceEvent> eventData}) {
     _updateValues(eventData: eventData, data: selectedProgram.options);
+    eventEmitter.emit(EventType.notify.name, this, eventData);
   }
 
   @override
   void updateNotifyProgramOptionsFromEvent({required List<DeviceEvent> eventData}) {
     _updateValues(eventData: eventData, data: notifyProgramOptions);
+    eventEmitter.emit(EventType.notify.name, this, eventData);
   }
 
   @override
@@ -188,7 +197,7 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
       for (var event in eventData) {
         for (var stat in data) {
           if (stat.key == event.key) {
-            print("updated ${stat.key} to ${event.value}");
+            // print("updated ${stat.key} to ${event.value}");
             stat.value = event.value;
           }
         }
@@ -245,8 +254,8 @@ class DeviceOven extends HomeDevice with ActiveOvenStatus {
     }
   }
 
-  @override
-  void addCallbackToListener({required EventCallback callback}) {
-    api.eventEmitter.addListener(callback);
-  }
+  // @override
+  // void addCallbackToListener({required EventCallback callback}) {
+  //   api.eventEmitter.addListener(callback);
+  // }
 }

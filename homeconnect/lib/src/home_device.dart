@@ -27,6 +27,8 @@ abstract class HomeDevice {
   List<DeviceStatus> status;
   List<DeviceProgram> programs;
   List<DeviceSetting> settings;
+  EventEmitter eventEmitter = EventEmitter();
+  List<Listener> listeners = [];
 
   addStatus(DeviceStatus stat) {
     status.add(stat);
@@ -59,6 +61,8 @@ abstract class HomeDevice {
 
   /// Updates the device active program from the provided [eventData]
   void updateNotifyProgramOptionsFromEvent({required List<DeviceEvent> eventData});
+
+  void updatePowerSettingsFromEvent({required List<DeviceEvent> eventData});
 
   /// Selects a program to run on the selected home appliance
   ///
@@ -124,7 +128,32 @@ abstract class HomeDevice {
   /// Before adding a callback we need to use startListening() to start listening for events.
   /// [callback] - the callback to add, needs to be of type [EventCallback]
   /// Trhows EventsException if the event listener is not initialized.
-  void addCallbackToListener({required EventCallback callback});
+  // void addCallbackToListener({required EventCallback callback});
+
+  Listener onNotify({required EventCallback callback}) {
+    return addListener(callback: callback, eventName: EventType.notify);
+  }
+
+  Listener onStatus({required EventCallback callback}) {
+    return addListener(callback: callback, eventName: EventType.status);
+  }
+
+  Listener onEvent({required EventCallback callback}) {
+    return addListener(callback: callback, eventName: EventType.event);
+  }
+
+  Listener addListener({required EventCallback callback, required EventType eventName}) {
+    var listener = eventEmitter.on(eventName.name, this, callback);
+    listeners.add(listener);
+    return listener;
+  }
+
+  Listener removeListener({required Listener listener}) {
+    print("removing listener: ${listener.eventName}");
+    eventEmitter.removeListener(listener.eventName, listener.callback);
+    listeners.remove(listener);
+    return listener;
+  }
 }
 
 // General data body used to update the status and settings of the device
