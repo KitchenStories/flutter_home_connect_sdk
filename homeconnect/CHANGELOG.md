@@ -1,3 +1,7 @@
+# 0.0.3
+
+- Fixes package description
+-
 # 0.0.2
 
 - Updates readme and description
