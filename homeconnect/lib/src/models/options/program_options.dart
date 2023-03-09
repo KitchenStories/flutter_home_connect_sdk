@@ -4,10 +4,12 @@ import 'package:json_annotation/json_annotation.dart';
 part 'program_options.g.dart';
 
 @JsonSerializable()
-class ProgramOptions {
+class ProgramOptions implements DeviceData {
+  @override
   final String key;
   String? type = '';
   String? unit = '';
+  @override
   dynamic value;
   OptionConstraints? constraints = OptionConstraints();
 
