@@ -3,7 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
 import '../utils/uri.dart';
 import './oauth_token.dart';
-import 'auth_exceptions.dart';
+import './auth_exceptions.dart';
+import './scopes.dart';
+
+const defaultScopes = [
+  OauthScope.identifyAppliance,
+];
 
 class HomeConnectAuthCredentials {
   final String accessToken;
@@ -88,6 +93,8 @@ class HomeConnectClientCredentials {
 }
 
 abstract class HomeConnectAuth {
+  List<OauthScope> scopes = defaultScopes;
+
   /// Get the code grant url
   ///
   /// Given the [baseUrl] and client [credentials] return the url
@@ -99,7 +106,10 @@ abstract class HomeConnectAuth {
       baseUrl.join('/security/oauth/token'),
       secret: credentials.clientSecret,
     );
-    return grant.getAuthorizationUrl(Uri.parse(credentials.redirectUri));
+    return grant.getAuthorizationUrl(
+      Uri.parse(credentials.redirectUri),
+      scopes: scopesToStringList(scopes),
+    );
   }
 
   /// Exchange the [code] for an access token.
