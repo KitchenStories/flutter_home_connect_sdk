@@ -95,23 +95,28 @@ class HomeConnectApi {
   }
 
   Future<List<HomeDevice>> getDevices() async {
-    final response = await get('');
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final List<dynamic> devices = data['data']['homeappliances'];
-      final result = <HomeDevice>[];
-      for (final device in devices) {
-        final deviceType = device['type'];
-        switch (deviceType) {
-          case 'Oven':
-            DeviceInfo info = DeviceInfo.fromJson(device);
-            result.add(DeviceOven.fromInfoPayload(this, info));
-            break;
+    try {
+      final response = await get('');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> devices = data['data']['homeappliances'];
+        final result = <HomeDevice>[];
+        for (final device in devices) {
+          final deviceType = device['type'];
+          switch (deviceType) {
+            case 'Oven':
+              DeviceInfo info = DeviceInfo.fromJson(device);
+              result.add(DeviceOven.fromInfoPayload(this, info));
+              break;
+          }
         }
+        return result;
+      } else {
+        throw Exception('Error getting devices: ${response.body}');
       }
-      return result;
-    } else {
-      throw Exception('Error getting devices: ${response.body}');
+    } catch (e) {
+      print(e);
+      return [];
     }
   }
 
