@@ -64,6 +64,11 @@ class TestStorage extends MemoryHomeConnectAuthStorage {
   Future<void> setCredentials(HomeConnectAuthCredentials credentials) async {
     this.credentials = credentials;
   }
+
+  @override
+  Future<void> clearCredentials() async {
+    credentials = null;
+  }
 }
 
 void main() {
@@ -217,5 +222,14 @@ void main() {
               ),
           throwsA(isA<Exception>()));
     });
+  });
+
+  test('is authenticated', () async {
+    expect(await api.isAuthenticated(), true);
+  });
+
+  test('logout', () async {
+    await api.logout();
+    expect(await api.isAuthenticated(), false);
   });
 }
