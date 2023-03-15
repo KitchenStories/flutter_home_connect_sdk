@@ -9,6 +9,7 @@ export 'src/models/info/device_info.dart';
 export 'src/models/devices/oven_device.dart';
 export 'src/home_device.dart';
 export 'src/client/client_dart.dart';
+export 'src/oauth/scopes.dart';
 export 'src/oauth/auth.dart';
 export 'src/oauth/auth_exceptions.dart';
 export 'src/oauth/oauth_token.dart';
