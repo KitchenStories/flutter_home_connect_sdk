@@ -146,4 +146,17 @@ class HomeConnectApi {
     final userCredentials = await storage.getCredentials();
     return userCredentials;
   }
+
+  Future<bool> isAuthenticated() async {
+    final credentials = await storage.getCredentials();
+    if (credentials == null) {
+      return false;
+    }
+
+    return !credentials.isAccessTokenExpired() || !credentials.isRefreshTokenExpired();
+  }
+
+  Future<void> logout() async {
+    await storage.clearCredentials();
+  }
 }
