@@ -1,22 +1,14 @@
 import 'dart:convert';
-
 import 'package:homeconnect/src/oauth/oauth_token.dart';
 import 'package:homeconnect/src/utils/uri.dart';
 import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
-
-
 import 'auth_exceptions.dart';
-
-import '../utils/uri.dart';
-import './oauth_token.dart';
-import './auth_exceptions.dart';
 import './scopes.dart';
 
 const defaultScopes = [
   OauthScope.identifyAppliance,
 ];
-
 
 class HomeConnectAuthCredentials {
   final String accessToken;
@@ -122,8 +114,8 @@ abstract class HomeConnectAuth {
 
   /// Exchange the [code] for an access token.
   /// throws [OauthCodeException] if the code request fails.
-  Future<HomeConnectAuthCredentials> exchangeCode(
-      Uri baseUrl, HomeConnectClientCredentials credentials, String code) async {
+  Future<HomeConnectAuthCredentials> exchangeCode(Uri baseUrl,
+      HomeConnectClientCredentials credentials, String code) async {
     late final http.Response tokenResponse;
     try {
       tokenResponse = await http.post(
@@ -139,7 +131,8 @@ abstract class HomeConnectAuth {
       throw OauthCodeException('Failed to refresh token');
     }
 
-    final res = OauthTokenResponsePayload.fromJson(json.decode(tokenResponse.body));
+    final res =
+        OauthTokenResponsePayload.fromJson(json.decode(tokenResponse.body));
     return HomeConnectAuthCredentials(
       accessToken: res.accessToken,
       refreshToken: res.refreshToken,
@@ -147,10 +140,12 @@ abstract class HomeConnectAuth {
     );
   }
 
-  Future<HomeConnectAuthCredentials> authorize(Uri baseUrl, HomeConnectClientCredentials credentials);
+  Future<HomeConnectAuthCredentials> authorize(
+      Uri baseUrl, HomeConnectClientCredentials credentials);
 
   /// Refresh the access token with the provided [refreshToken].
-  Future<HomeConnectAuthCredentials> refresh(Uri baseUrl, String refreshToken) async {
+  Future<HomeConnectAuthCredentials> refresh(
+      Uri baseUrl, String refreshToken) async {
     final res = await http.post(baseUrl.join("security/oauth/token"), body: {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken,
