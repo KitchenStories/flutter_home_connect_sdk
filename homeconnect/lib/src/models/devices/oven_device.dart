@@ -195,6 +195,10 @@ class DeviceOven extends HomeDevice {
     }
   }
 
+  // TODO: addTime method, should use the programs/active/options/key endpoint to add time to the running program.
+
+  // TODO: changeTemperature method, should use the programs/active/options/key endpoint to change the temperature of the running program.
+
   void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {
     for (var event in eventData) {
       for (var stat in data) {
