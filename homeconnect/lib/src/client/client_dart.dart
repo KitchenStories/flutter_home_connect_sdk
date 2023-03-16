@@ -61,20 +61,28 @@ class HomeConnectApi {
   Future<http.Response> put({required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    final uri = baseUrl.join('/api/homeappliances/$resource');
-    final response = await client.put(uri, headers: commonHeaders, body: body);
-    return response;
+    try {
+      final uri = baseUrl.join('/api/homeappliances/$resource');
+      final response = await client.put(uri, headers: commonHeaders, body: body);
+      return response;
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   Future<http.Response> get(String resource) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    final uri = baseUrl.join('/api/homeappliances/$resource');
-    final response = await client.get(
-      uri,
-      headers: commonHeaders,
-    );
-    return response;
+    try {
+      final uri = baseUrl.join('/api/homeappliances/$resource');
+      final response = await client.get(
+        uri,
+        headers: commonHeaders,
+      );
+      return response;
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   Future<http.Response> delete(String resource) async {
