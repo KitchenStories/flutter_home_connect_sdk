@@ -67,6 +67,8 @@ abstract class HomeDevice {
 
   Future<List<DeviceSetting>> getSettings();
 
+  Future<List<ProgramOptions>> getSelectedProgramOptions();
+
   /// Starts the selected program
   ///
   /// If no program is selected, throws an exception.
@@ -76,7 +78,7 @@ abstract class HomeDevice {
   ///
   /// [options] - a list of options for the program, e.g. temperature, duration, etc.
   /// Trhows generic exception if the request fails.
-  Future<void> startProgram({String programKey, required List<ProgramOptions> options});
+  Future<void> startProgram({String programKey, List<ProgramOptions> options = const []});
 
   /// Stops the currently running program
   ///
