@@ -15,7 +15,6 @@ class HomeConnectOauth extends HomeConnectAuth {
   @override
   Future<HomeConnectAuthCredentials> authorize(Uri baseUrl, HomeConnectClientCredentials credentials) async {
     final authorizationUrl = getCodeGrant(baseUrl, credentials);
-    print("Authorize: $authorizationUrl");
     final response = await showLogin(
       context: context,
       clientId: credentials.clientId,
