@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
-
 import 'package:eventsource/eventsource.dart';
 import 'package:homeconnect/homeconnect.dart';
-import 'package:homeconnect/src/models/event/event_controller.dart';
 import 'package:homeconnect/src/utils/uri.dart';
-
 import 'package:http/http.dart' as http;
 
 class HomeConnectApi {
+  EventController eventEmitter = EventController();
+
   late http.Client client;
   Uri baseUrl;
   String _accessToken = '';
@@ -96,30 +95,35 @@ class HomeConnectApi {
   }
 
   Future<List<HomeDevice>> getDevices() async {
-    final response = await get('');
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final List<dynamic> devices = data['data']['homeappliances'];
-      final result = <HomeDevice>[];
-      for (final device in devices) {
-        final deviceType = device['type'];
-        switch (deviceType) {
-          case 'Oven':
-            DeviceInfo info = DeviceInfo.fromJson(device);
-            result.add(DeviceOven.fromInfoPayload(this, info));
-            break;
+    try {
+      final response = await get('');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> devices = data['data']['homeappliances'];
+        final result = <HomeDevice>[];
+        for (final device in devices) {
+          final deviceType = device['type'];
+          switch (deviceType) {
+            case 'Oven':
+              DeviceInfo info = DeviceInfo.fromJson(device);
+              result.add(DeviceOven.fromInfoPayload(this, info));
+              break;
+          }
         }
+        return result;
+      } else {
+        throw Exception('Error getting devices: ${response.body}');
       }
-      return result;
-    } else {
-      throw Exception('Error getting devices: ${response.body}');
+    } catch (e) {
+      print(e);
+      return [];
     }
   }
 
   Future<void> openEventListenerChannel({required HomeDevice source}) async {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    EventController eventController = EventController();
+
     _accessToken = userCredentials!.accessToken;
 
     try {
@@ -128,7 +132,7 @@ class HomeConnectApi {
         headers: commonHeaders,
       );
       subscription = eventSource.listen((Event event) {
-        eventController.handleEvent(event, source);
+        eventEmitter.handleEvent(event, source);
       });
     } catch (e) {
       throw Exception("Event Source error: $e");

@@ -49,39 +49,53 @@ void main() async {
     // devices listen to events, we need to open a stream to receive them
     selectedDevice.startListening();
 
-    // print all available programs
-    for (var element in selectedDevice.programs) {
-      print(element.key);
+    notifyCallback(ev, obj) {
+      print("from notify callback ${ev.eventData.first.key}");
+      print("from notify callback ${ev.eventData.first.value}");
     }
 
-    // print devices status
-    for (var element in selectedDevice.status) {
-      print(element.key);
+    statusCallback(ev, obj) {
+      print("from status callback ${ev.eventData.first.key}");
+      print("from status callback ${ev.eventData.first.value}");
     }
 
-    // we need to select a program to get its options and constraints
-    await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
-
-    // print all available options
-    for (var option in selectedDevice.selectedProgram.options) {
-      print(option.key);
-      print(option.constraints!.toJson());
+    eventCallback(ev, ob) {
+      print("from event callback ${ob.info.name}");
     }
 
-    final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
-    final option2 = ProgramOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
+    selectedDevice.onNotify(callback: notifyCallback);
 
-    // start the program with the selected options
-    await selectedDevice.startProgram(options: [option1, option2]);
-    await Future.delayed(Duration(seconds: 5));
-    selectedDevice.stopProgram();
+    selectedDevice.onStatus(callback: statusCallback);
 
-    await Future.delayed(Duration(seconds: 5));
-    // turn off the oven
-    selectedDevice.turnOff();
-    await Future.delayed(Duration(seconds: 5));
-    // turn on the oven
-    selectedDevice.turnOn();
+    selectedDevice.onEvent(callback: eventCallback);
+
+    await Future.delayed(Duration(seconds: 10));
+
+    // selectedDevice.removeListener(listener: selectedDevice.listeners.first);
+
+    try {
+      // selectedDevice.addCallbackToListener(callback: (ev, obj) {
+      //   print("from callback ${ev.eventData}");
+      // });
+    } catch (e) {
+      print(e);
+    }
+    // for (var element in selectedDevice.programs) {
+    //   print(element.key);
+    // }
+    // await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+
+    // final option1 = ProgramOptions.toCommandPayload(key: 'Cooking.Oven.Option.SetpointTemperature', value: 200);
+    // final option2 = ProgramOptions.toCommandPayload(key: 'BSH.Common.Option.Duration', value: 500);
+
+    // selectedDevice.startProgram(options: [option1, option2]);
+    // await Future.delayed(Duration(seconds: 5));
+    // selectedDevice.stopProgram();
+
+    // await Future.delayed(Duration(seconds: 5));
+    // selectedDevice.turnOff();
+    // await Future.delayed(Duration(seconds: 5));
+    // selectedDevice.turnOn();
   } catch (e) {
     // close the stream on error
     api.closeEventChannel();
