@@ -15,7 +15,6 @@ class HomeConnectOauth extends HomeConnectAuth {
   @override
   Future<HomeConnectAuthCredentials> authorize(Uri baseUrl, HomeConnectClientCredentials credentials) async {
     final authorizationUrl = getCodeGrant(baseUrl, credentials);
-    print("Authorize: $authorizationUrl");
     final response = await showLogin(
       context: context,
       clientId: credentials.clientId,
@@ -25,6 +24,13 @@ class HomeConnectOauth extends HomeConnectAuth {
 
     if (response == null) {
       throw Exception("Login failed");
+    }
+
+    if (response["error"] != null) {
+      if (response["error"] == "invalid_scope") {
+        throw OauthScopeException("Invalid scope");
+      }
+      throw Exception(response["error"]);
     }
 
     return exchangeCode(baseUrl, credentials, response["token"]);

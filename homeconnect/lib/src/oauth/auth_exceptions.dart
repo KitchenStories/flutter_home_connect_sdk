@@ -15,6 +15,10 @@ class OauthCodeException extends AuthException {
   OauthCodeException(super.message);
 }
 
+class OauthScopeException extends AuthException {
+  OauthScopeException(super.message);
+}
+
 class InvalidTokenException extends AuthException {
   InvalidTokenException(super.message);
 }
