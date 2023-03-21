@@ -61,27 +61,27 @@ class HomeConnectApi {
   Future<http.Response> put({required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    try {
-      final uri = baseUrl.join('/api/homeappliances/$resource');
-      final response = await client.put(uri, headers: commonHeaders, body: body);
+    final uri = baseUrl.join('/api/homeappliances/$resource');
+    final response = await client.put(uri, headers: commonHeaders, body: body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       return response;
-    } catch (e) {
-      throw Exception(e);
+    } else {
+      throw Exception(response.body);
     }
   }
 
   Future<http.Response> get(String resource) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     _accessToken = userCredentials!.accessToken;
-    try {
-      final uri = baseUrl.join('/api/homeappliances/$resource');
-      final response = await client.get(
-        uri,
-        headers: commonHeaders,
-      );
+    final uri = baseUrl.join('/api/homeappliances/$resource');
+    final response = await client.get(
+      uri,
+      headers: commonHeaders,
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       return response;
-    } catch (e) {
-      throw Exception(e);
+    } else {
+      throw Exception(response.body);
     }
   }
 
@@ -93,7 +93,11 @@ class HomeConnectApi {
       uri,
       headers: commonHeaders,
     );
-    return response;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response;
+    } else {
+      throw Exception(response.body);
+    }
   }
 
   Map<String, String> get commonHeaders {
