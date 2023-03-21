@@ -69,6 +69,8 @@ abstract class HomeDevice {
 
   Future<List<ProgramOptions>> getSelectedProgramOptions();
 
+  Future<DeviceProgram> getSelectedProgram();
+
   /// Starts the selected program
   ///
   /// If no program is selected, throws an exception.
