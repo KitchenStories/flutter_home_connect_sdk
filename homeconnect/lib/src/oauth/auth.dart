@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
+import 'package:uuid/uuid.dart';
 import '../utils/uri.dart';
 import './oauth_token.dart';
 import './auth_exceptions.dart';
@@ -94,17 +95,20 @@ class HomeConnectClientCredentials {
 
 abstract class HomeConnectAuth {
   List<OauthScope> scopes = defaultScopes;
+  String? codeVerifier;
 
   /// Get the code grant url
   ///
   /// Given the [baseUrl] and client [credentials] return the url
   /// to which the user should be redirected to authorize the app.
   Uri getCodeGrant(Uri baseUrl, HomeConnectClientCredentials credentials) {
+    codeVerifier = Uri.encodeFull(Uuid().v4());
     final grant = oauth2.AuthorizationCodeGrant(
       credentials.clientId,
       baseUrl.join('/security/oauth/authorize'),
       baseUrl.join('/security/oauth/token'),
       secret: credentials.clientSecret,
+      codeVerifier: codeVerifier,
     );
     return grant.getAuthorizationUrl(
       Uri.parse(credentials.redirectUri),
@@ -117,18 +121,23 @@ abstract class HomeConnectAuth {
   Future<HomeConnectAuthCredentials> exchangeCode(
       Uri baseUrl, HomeConnectClientCredentials credentials, String code) async {
     late final http.Response tokenResponse;
+    final tokenPayload = {
+      'grant_type': 'authorization_code',
+      'code': code,
+      'client_id': credentials.clientId,
+      'redirect_uri': credentials.redirectUri,
+      'code_verifier': codeVerifier,
+    };
+    if (credentials.clientSecret != null) {
+        tokenPayload['client_secret'] = credentials.clientSecret;
+    }
     try {
       tokenResponse = await http.post(
         baseUrl.join('/security/oauth/token'),
-        body: {
-          'grant_type': 'authorization_code',
-          'code': code,
-          'client_id': credentials.clientId,
-          'redirect_uri': credentials.redirectUri,
-        },
+        body: tokenPayload
       );
     } catch (e) {
-      throw OauthCodeException('Failed to refresh token');
+      throw OauthCodeException('Failed to exchange token');
     }
 
     final res = OauthTokenResponsePayload.fromJson(json.decode(tokenResponse.body));
