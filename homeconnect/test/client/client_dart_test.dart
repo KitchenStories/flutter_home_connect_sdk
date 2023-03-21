@@ -1,6 +1,11 @@
 import 'dart:convert';
 
-import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/src/client/client_dart.dart';
+import 'package:homeconnect/src/models/devices/oven_device.dart';
+import 'package:homeconnect/src/models/info/device_info.dart';
+import 'package:homeconnect/src/models/options/program_options.dart';
+import 'package:homeconnect/src/models/programs/device_program.dart';
+import 'package:homeconnect/src/oauth/auth.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -91,6 +96,8 @@ void main() {
     print(request.url.path);
     if (request.url.path == "/api/homeappliances/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
       return http.Response('{"data": "oven-info"}', 204);
+    } else if (request.url.path == "/api/homeappliances/non-existing-device") {
+      return http.Response('{"data": "not-found"}', 404);
     }
     return http.Response('Not Found', 404);
   });
@@ -112,14 +119,14 @@ void main() {
   final device = DeviceOven.fromPayload(api, infoPayload, [], [], [], []);
 
   group('Api test', () {
+    test('get non existing device', () async {
+      expect(() async {
+        await api.get('non-existing-device');
+      }, throwsException);
+    });
     test('get existing device', () async {
       final response = await api.get(device.deviceHaId);
       expect(response.body, '{"data": "oven-info"}');
-    });
-
-    test('get non existing device', () async {
-      final response = await api.get('non-existing-device');
-      expect(response.body, 'Not Found');
     });
   });
 
