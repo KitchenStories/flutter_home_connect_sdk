@@ -1,3 +1,9 @@
+# 0.0.4
+
+- Support oauth flow verification code
+- Adds logout/clear token support
+- Adds oven oauth scopes enum support
+
 # 0.0.3
 
 - Fixes package description
