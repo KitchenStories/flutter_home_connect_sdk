@@ -12,6 +12,7 @@ class LoginView extends StatelessWidget {
   final String redirectUrl;
   final String authorizationUrl;
   final void Function(Map<String, dynamic>) onLogin;
+  final void Function(String) onError;
 
   // ignore: prefer_const_constructors_in_immutables
   LoginView({
@@ -20,6 +21,7 @@ class LoginView extends StatelessWidget {
     required this.authorizationUrl,
     required this.redirectUrl,
     required this.onLogin,
+    required this.onError,
   });
 
   @override
@@ -31,8 +33,13 @@ class LoginView extends StatelessWidget {
         // if redirect url is called, we have to extract the code from the url
         if (navReq.url.startsWith(redirectUrl.toString())) {
           final responseUrl = Uri.parse(navReq.url);
-          onLogin({"token": responseUrl.queryParameters["code"]});
-          return NavigationDecision.prevent;
+          if ( responseUrl.queryParameters["error"] != null) {
+            onError(responseUrl.queryParameters["error"]!);
+            return NavigationDecision.prevent;
+          } else {
+            onLogin({"token": responseUrl.queryParameters["code"]});
+            return NavigationDecision.prevent;
+          }
         }
         return NavigationDecision.navigate;
       }),
@@ -59,6 +66,11 @@ Future<Map<String, dynamic>?> showLogin({
     redirectUrl: redirectUrl,
     onLogin: (token) {
       Navigator.of(context).pop(token);
+    },
+    onError: (error) {
+      Navigator.of(context).pop({
+        "error": error,
+      });
     },
   );
 

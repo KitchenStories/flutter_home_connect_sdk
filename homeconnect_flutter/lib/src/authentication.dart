@@ -26,6 +26,13 @@ class HomeConnectOauth extends HomeConnectAuth {
       throw Exception("Login failed");
     }
 
+    if (response["error"] != null) {
+      if (response["error"] == "invalid_scope") {
+        throw OauthScopeException("Invalid scope");
+      }
+      throw Exception(response["error"]);
+    }
+
     return exchangeCode(baseUrl, credentials, response["token"]);
   }
 }
