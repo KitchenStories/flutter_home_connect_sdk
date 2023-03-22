@@ -93,7 +93,6 @@ void main() {
   ));
 
   final mockClient = MockClient((request) async {
-    print(request.url.path);
     if (request.url.path == "/api/homeappliances/BOSCH-HCS01OVN1-54E7EF9DEDBB") {
       return http.Response('{"data": "oven-info"}', 204);
     } else if (request.url.path == "/api/homeappliances/non-existing-device") {
