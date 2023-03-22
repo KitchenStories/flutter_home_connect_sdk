@@ -4,6 +4,7 @@ import 'package:homeconnect/homeconnect.dart';
 
 const accessToken = "";
 const refreshToken = "";
+const clientSecret = "";
 
 class SandboxAuthorizer extends HomeConnectAuth {
   @override

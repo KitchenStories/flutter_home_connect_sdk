@@ -27,13 +27,14 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     controller = WebViewController()..loadRequest(Uri.parse(authorizationUrl));
+    controller.setJavaScriptMode(JavaScriptMode.unrestricted);
 
     controller.setNavigationDelegate(
       NavigationDelegate(onNavigationRequest: (navReq) {
         // if redirect url is called, we have to extract the code from the url
         if (navReq.url.startsWith(redirectUrl.toString())) {
           final responseUrl = Uri.parse(navReq.url);
-          if ( responseUrl.queryParameters["error"] != null) {
+          if (responseUrl.queryParameters["error"] != null) {
             onError(responseUrl.queryParameters["error"]!);
             return NavigationDecision.prevent;
           } else {
@@ -84,7 +85,7 @@ Future<Map<String, dynamic>?> showLogin({
     ),
     builder: (BuildContext buildContext) {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
             children: [
