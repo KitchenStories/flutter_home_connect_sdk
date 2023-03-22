@@ -85,7 +85,7 @@ Future<Map<String, dynamic>?> showLogin({
     ),
     builder: (BuildContext buildContext) {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
