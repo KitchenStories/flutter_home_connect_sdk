@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:homeconnect/homeconnect.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -37,4 +39,21 @@ class ProgramOptionsListPayload {
     var options = json['data']['options'] as List;
     return ProgramOptionsListPayload(options.map((e) => ProgramOptions.fromJson(e as Map<String, dynamic>)).toList());
   }
+}
+
+class SetProgramOptionsPayload {
+  final String key;
+  final dynamic value;
+  final String unit;
+
+  SetProgramOptionsPayload(this.key, this.value, {this.unit = "default"});
+  String get body => json.encode(
+        {
+          "data": {
+            "key": key,
+            "value": value,
+            "unit": unit,
+          }
+        },
+      );
 }

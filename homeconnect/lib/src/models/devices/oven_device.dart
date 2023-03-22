@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/src/models/devices/oven_enums.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
 import 'package:homeconnect/src/models/settings/constraints/setting_constraints.dart';
 import 'package:homeconnect/src/models/settings/device_setting.dart';
@@ -18,6 +19,25 @@ class DeviceOven extends HomeDevice {
 
   factory DeviceOven.fromInfoPayload(HomeConnectApi api, DeviceInfo info) {
     return DeviceOven(api, info, [], [], [], []);
+  }
+
+  @override
+  Future<List<ProgramOptions>> getSelectedProgramOptions() async {
+    String resource = "$deviceHaId/programs/selected/";
+    final res = await api.get(resource);
+    final data = json.decode(res.body);
+    final options = ProgramOptionsListPayload.fromJson(data).options;
+    return options;
+  }
+
+  @override
+  Future<DeviceProgram> getSelectedProgram() async {
+    String resource = "$deviceHaId/programs/selected/";
+    final res = await api.get(resource);
+    final data = json.decode(res.body);
+    final options = ProgramOptionsListPayload.fromJson(data).options;
+    final programKey = data['data']['key'];
+    return DeviceProgram(programKey, options);
   }
 
   @override
@@ -87,21 +107,27 @@ class DeviceOven extends HomeDevice {
         }
       }
     } catch (e) {
-      throw Exception("Something went wrong: $e");
+      throw Exception("Could not select program: $e");
     }
   }
 
   @override
-  Future<void> startProgram({String? programKey, required List<ProgramOptions> options}) async {
+  Future<void> startProgram({String? programKey, List<ProgramOptions> options = const []}) async {
     programKey ??= selectedProgram.key;
     if (programKey.isEmpty) {
       throw Exception("No program selected");
     }
     try {
-      final payload = StartProgramPayload(this, options);
+      StartProgramPayload payload;
+      if (options.isEmpty) {
+        final selectedOptions = await getSelectedProgramOptions();
+        payload = StartProgramPayload(this, selectedOptions);
+      } else {
+        payload = StartProgramPayload(this, options);
+      }
       await api.put(body: payload.body, resource: payload.resource);
     } catch (e) {
-      throw Exception("Something went wrong: $e, $options, $programKey");
+      throw Exception(e);
     }
   }
 
@@ -157,6 +183,32 @@ class DeviceOven extends HomeDevice {
     }
   }
 
+  Future<void> setTemperature({required int temperature}) async {
+    final programKey = ovenOptionsMap[OvenOptionsEnums.temperature];
+    final payload = SetProgramOptionsPayload(programKey!, temperature, unit: "°F");
+    final resource = "$deviceHaId/programs/selected/options/$programKey";
+    try {
+      api.put(resource: resource, body: payload.body);
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
+  }
+
+  Future<void> setDuration({required int duration}) async {
+    final programKey = ovenOptionsMap[OvenOptionsEnums.duration];
+    final payload = SetProgramOptionsPayload(programKey!, duration);
+    final resource = "$deviceHaId/programs/selected/options/$programKey";
+    try {
+      api.put(resource: resource, body: payload.body);
+    } catch (e) {
+      throw Exception("Something went wrong: $e");
+    }
+  }
+
+  // TODO: addTime method, should use the programs/active/options/key endpoint to add time to the running program.
+
+  // TODO: changeTemperature method, should use the programs/active/options/key endpoint to change the temperature of the running program.
+
   void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {
     for (var event in eventData) {
       for (var stat in data) {
@@ -169,7 +221,7 @@ class DeviceOven extends HomeDevice {
 
   void _setPower(String state) {
     final programKey = settingsMap[OvenSettings.power];
-    final value = validValuesMap[OvenSettings.power]?[state];
+    final value = powerStateMap[OvenSettings.power]?[state];
     final payload = SetSettingsPayload(deviceHaId, programKey!, value);
     api.put(resource: payload.resource, body: payload.body);
   }

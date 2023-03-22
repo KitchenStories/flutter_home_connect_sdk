@@ -63,7 +63,11 @@ class HomeConnectApi {
     _accessToken = userCredentials!.accessToken;
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.put(uri, headers: commonHeaders, body: body);
-    return response;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response;
+    } else {
+      throw Exception(response.body);
+    }
   }
 
   Future<http.Response> get(String resource) async {
@@ -74,7 +78,11 @@ class HomeConnectApi {
       uri,
       headers: commonHeaders,
     );
-    return response;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response;
+    } else {
+      throw Exception(response.body);
+    }
   }
 
   Future<http.Response> delete(String resource) async {
@@ -85,7 +93,11 @@ class HomeConnectApi {
       uri,
       headers: commonHeaders,
     );
-    return response;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response;
+    } else {
+      throw Exception(response.body);
+    }
   }
 
   Map<String, String> get commonHeaders {
