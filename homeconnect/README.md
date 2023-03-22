@@ -8,12 +8,11 @@ Prerequisites
 
 # Installation
 
-Add the following dependency to your `pubspec.yaml` file:
+Add the homeconnect sdk package:
 
-yaml
-
-    dependencies:
-    homeconnect: ^0.0.2
+```sh
+dart pub add homeconnect
+```
 
 Then, run `dart pub get` to install the package.
 
