@@ -1,3 +1,7 @@
+# 0.0.5
+
+- Fixes login modal in Android by setting the webview javascript to unrestricted
+
 # 0.0.4
 
 - Adds oauth scopes support
