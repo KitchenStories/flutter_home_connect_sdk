@@ -1,3 +1,8 @@
+# 0.0.5
+
+- Removes trailing slash
+- Return empty list when no devices are found
+-
 # 0.0.4
 
 - Support oauth flow verification code
