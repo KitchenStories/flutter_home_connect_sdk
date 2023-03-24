@@ -18,12 +18,7 @@ class AllowedValuesPayload {
 
   AllowedValuesPayload(this.constraints);
   factory AllowedValuesPayload.fromJson(Map<String, dynamic> json) {
-    var allowedValues = [];
-    try {
-      allowedValues = json['data']['constraints']['allowedvalues'] as List;
-    } catch (e) {
-      allowedValues = [];
-    }
+    var allowedValues = json['data']['constraints']['allowedvalues'] as List? ?? [];
     return AllowedValuesPayload(SettingsConstraints(allowedValues: allowedValues));
   }
 }
