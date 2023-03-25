@@ -221,7 +221,7 @@ class DeviceOven extends HomeDevice {
 
   void _setPower(String state) {
     final programKey = settingsMap[OvenSettings.power];
-    final value = powerStateMap[OvenSettings.power]?[state];
+    final value = powerStateMap[OvenSettingsEnums.power]![state];
     final payload = SetSettingsPayload(deviceHaId, programKey!, value);
     api.put(resource: payload.resource, body: payload.body);
   }
