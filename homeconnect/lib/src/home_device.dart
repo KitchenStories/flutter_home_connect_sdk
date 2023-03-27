@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:homeconnect/homeconnect.dart';
 import 'package:homeconnect/src/models/devices/device_exceptions.dart';
+import 'package:homeconnect/src/models/devices/operation_states.dart';
 import 'package:homeconnect/src/models/event/device_event.dart';
 import 'package:homeconnect/src/models/settings/constraints/setting_constraints.dart';
 
@@ -44,8 +45,8 @@ abstract class HomeDevice {
   /// Sets the [status] and [programs] properties for this device
   /// by calling the [getPrograms] and [getStatus] methods.
   Future<HomeDevice> init() async {
-    programs = await getPrograms();
     status = await getStatus();
+    programs = await getPrograms();
     settings = await getSettings();
     return this;
   }
@@ -96,6 +97,9 @@ abstract class HomeDevice {
   /// Trhows generic exception if the request fails.
   Future<List<DeviceProgram>> getPrograms() async {
     try {
+      if (!isDeviceReady()) {
+        throw DeviceExceptions("Please stop device before selecting program");
+      }
       String resource = "$deviceHaId/programs/available";
       final res = await api.get(resource);
       final data = json.decode(res.body);
@@ -164,6 +168,10 @@ abstract class HomeDevice {
     } catch (e) {
       throw DeviceProgramException("Could not get selected program: $e");
     }
+  }
+
+  bool isDeviceReady() {
+    return status.any((stat) => stat.value == operationState(state: OperationStatesEnum.ready));
   }
 
   /// Starts the selected program
