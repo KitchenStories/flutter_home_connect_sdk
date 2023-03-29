@@ -180,7 +180,7 @@ abstract class HomeDevice {
   /// Throws [DeviceProgramException] if the request fails.
   Future<void> startProgram({String? programKey, List<ProgramOptions> options = const []}) async {
     programKey ??= selectedProgram?.key;
-    if (programKey == null) {
+    if (programKey == null || programKey.isEmpty) {
       throw DeviceProgramException("No program selected");
     }
     try {
@@ -233,8 +233,7 @@ abstract class HomeDevice {
     }
   }
 
-  void _updateValues<T extends DeviceData>(
-      {required List<DeviceEvent> eventData, required List<T> data}) {
+  void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {
     for (var event in eventData) {
       for (var stat in data) {
         if (stat.key == event.key) {
@@ -250,8 +249,7 @@ abstract class HomeDevice {
     return ProgramOptionsListPayload.fromJson(constraintsData).options;
   }
 
-  void _updateSelectedOptions(
-      List<ProgramOptions> selectedOptions, List<ProgramOptions> fullOptions) {
+  void _updateSelectedOptions(List<ProgramOptions> selectedOptions, List<ProgramOptions> fullOptions) {
     for (var option in selectedOptions) {
       for (var fullOption in fullOptions) {
         if (option.key == fullOption.key) {
