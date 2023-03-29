@@ -65,8 +65,7 @@ abstract class HomeDevice {
   Future<void> selectProgram({required String programKey}) async {
     try {
       // Select program, sends put request
-      final SelectProgramPayload payload =
-          SelectProgramPayload(this, programKey);
+      final payload = SelectProgramPayload(this, programKey);
       await api.put(body: payload.body, resource: payload.resource);
 
       // Get program options, /selected returns the program with no constraints
@@ -126,12 +125,10 @@ abstract class HomeDevice {
       // Get constraints for each setting
       for (var setting in settings) {
         setting.constraints = SettingsConstraints(allowedValues: []);
-        var constraintResponse =
-            await api.get("$deviceHaId/settings/${setting.key}");
+        var constraintResponse = await api.get("$deviceHaId/settings/${setting.key}");
         final data = json.decode(constraintResponse.body);
         // Add constraints to setting
-        final allowedValuesResponse =
-            AllowedValuesPayload.fromJson(data).constraints.allowedValues;
+        final allowedValuesResponse = AllowedValuesPayload.fromJson(data).constraints.allowedValues;
         setting.constraints.allowedValues.addAll(allowedValuesResponse);
       }
       // Return complete list of settings
@@ -149,8 +146,7 @@ abstract class HomeDevice {
       final options = ProgramOptionsListPayload.fromJson(data).options;
       return options;
     } catch (e) {
-      throw DeviceProgramException(
-          "Could not get selected program options: $e");
+      throw DeviceProgramException("Could not get selected program options: $e");
     }
   }
 
@@ -182,8 +178,7 @@ abstract class HomeDevice {
   ///
   /// [options] - a list of options for the program, e.g. temperature, duration, etc.
   /// Throws [DeviceProgramException] if the request fails.
-  Future<void> startProgram(
-      {String? programKey, List<ProgramOptions> options = const []}) async {
+  Future<void> startProgram({String? programKey, List<ProgramOptions> options = const []}) async {
     programKey ??= selectedProgram?.key;
     if (programKey == null) {
       throw DeviceProgramException("No program selected");
@@ -250,8 +245,7 @@ abstract class HomeDevice {
   }
 
   Future<List<ProgramOptions>> _getFullOptions(String programKey) async {
-    var constraintsRes =
-        await api.get("$deviceHaId/programs/available/$programKey");
+    var constraintsRes = await api.get("$deviceHaId/programs/available/$programKey");
     var constraintsData = json.decode(constraintsRes.body);
     return ProgramOptionsListPayload.fromJson(constraintsData).options;
   }
