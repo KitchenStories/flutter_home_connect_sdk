@@ -17,17 +17,19 @@ class ProgramOptions {
 
   Map<String, dynamic> toJson() => _$ProgramOptionsToJson(this);
 
-  factory ProgramOptions.fromJson(Map<String, dynamic> json) => ProgramOptions(
-        json['key'] as String,
-        json['type'] ??= '',
-        json['unit'] ??= '',
-        json['value'],
-        json['constraints'] == null ? null : OptionConstraints.fromJson(json['constraints'] as Map<String, dynamic>),
-      );
+  factory ProgramOptions.fromJson(Map<String, dynamic> json) {
+    return ProgramOptions(
+      json['key'] as String,
+      json['type'] ??= '',
+      json['unit'] ??= '',
+      json['value'],
+      json['constraints'] == null ? null : OptionConstraints.fromJson(json['constraints'] as Map<String, dynamic>),
+    );
+  }
 
   /// Creates a [ProgramOptions] object from a [key] and [value].
-  factory ProgramOptions.toCommandPayload({required String key, required dynamic value}) {
-    return ProgramOptions(key, null, null, value, null);
+  factory ProgramOptions.toCommandPayload({required String key, required dynamic value, String? unit}) {
+    return ProgramOptions(key, null, unit, value, null);
   }
 }
 
