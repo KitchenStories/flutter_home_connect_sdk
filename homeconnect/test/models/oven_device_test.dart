@@ -45,8 +45,6 @@ main() {
 
   DeviceInfo infoPayload = DeviceInfo.fromJson(info);
 
-  final oven = DeviceOven.fromPayload(api, infoPayload, [], [], [], []);
-
   group('Oven specific methods', () {
     test('should send a power request with valid data', () async {
       final mockApi = MockApi();
