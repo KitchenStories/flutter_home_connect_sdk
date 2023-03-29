@@ -1,4 +1,10 @@
-enum OvenSettingsEnums { power, temperatureUnit, childLock, alarmClock, sabbathMode }
+enum OvenSettingsEnums {
+  power,
+  temperatureUnit,
+  childLock,
+  alarmClock,
+  sabbathMode
+}
 
 enum OvenOptionsEnums { temperature, duration }
 
@@ -16,5 +22,16 @@ Map<OvenOptionsEnums, String> ovenOptionsMap = {
 };
 
 Map<OvenSettingsEnums, Map<String, String>> powerStateMap = {
-  OvenSettingsEnums.power: {'on': "BSH.Common.EnumType.PowerState.On", 'off': "BSH.Common.EnumType.PowerState.Standby"}
+  OvenSettingsEnums.power: {
+    'on': "BSH.Common.EnumType.PowerState.On",
+    'off': "BSH.Common.EnumType.PowerState.Standby"
+  }
 };
+
+String getOvenSettingsKey(OvenSettingsEnums key) {
+  return ovenSettingsMap[key]!;
+}
+
+String getOvenOptionsKey(OvenOptionsEnums key) {
+  return ovenOptionsMap[key]!;
+}
