@@ -1,3 +1,8 @@
+# 0.1.0
+
+- Adds device exceptions
+- Adds units to payloads
+
 # 0.0.5
 
 - Removes trailing slash

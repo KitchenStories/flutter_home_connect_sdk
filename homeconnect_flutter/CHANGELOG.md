@@ -1,3 +1,7 @@
+# 0.1.0
+
+- Updates homeconnect sdk sandbox API discrepancy fixes
+-
 # 0.0.5
 
 - Fixes login modal in Android by setting the webview javascript to unrestricted
