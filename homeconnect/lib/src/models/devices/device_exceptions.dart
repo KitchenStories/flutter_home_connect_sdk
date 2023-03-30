@@ -1,20 +1,21 @@
-class DeviceExceptions implements Exception {
+class DeviceException implements Exception {
   final String message;
+  final StackTrace? stackTrace;
 
-  DeviceExceptions(this.message);
+  DeviceException(this.message, [this.stackTrace]);
 
   @override
   String toString() => message;
 }
 
-class DeviceProgramException extends DeviceExceptions {
-  DeviceProgramException(super.message);
+class DeviceProgramException extends DeviceException {
+  DeviceProgramException(super.message, [super.stackTrace]);
 }
 
-class DeviceStatusException extends DeviceExceptions {
-  DeviceStatusException(super.message);
+class DeviceStatusException extends DeviceException {
+  DeviceStatusException(super.message, [super.stackTrace]);
 }
 
-class DeviceSettingException extends DeviceExceptions {
-  DeviceSettingException(super.message);
+class DeviceSettingException extends DeviceException {
+  DeviceSettingException(super.message, [super.stackTrace]);
 }

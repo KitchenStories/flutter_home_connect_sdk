@@ -77,8 +77,8 @@ abstract class HomeDevice {
       // Get program options with constraints
       final fullOptions = await _getFullOptions(programKey);
       _updateSelectedOptions(selectedOptions, fullOptions);
-    } catch (e) {
-      throw Exception("Could not select program: $e");
+    } catch (e, stacktrace) {
+      throw DeviceProgramException("Could not select program", stacktrace);
     }
   }
 
@@ -91,15 +91,15 @@ abstract class HomeDevice {
   Future<List<DeviceProgram>> getPrograms() async {
     try {
       if (!isDeviceReady()) {
-        throw DeviceExceptions("Device is busy!");
+        throw DeviceException("Device is busy!");
       }
       String resource = "$deviceHaId/programs/available";
       final res = await api.get(resource);
       final data = json.decode(res.body);
       final programs = ProgramListPayload.fromJson(data).programs;
       return programs;
-    } catch (e) {
-      throw DeviceProgramException("Could not get programs: $e");
+    } catch (e, stacktrace) {
+      throw DeviceProgramException("Could not get programs", stacktrace);
     }
   }
 
@@ -110,8 +110,8 @@ abstract class HomeDevice {
       final data = json.decode(res.body);
       final status = DeviceStatsListPayload.fromJson(data).stats;
       return status;
-    } catch (e) {
-      throw DeviceStatusException("Could not get status: $e");
+    } catch (e, stacktrace) {
+      throw DeviceStatusException("Could not get status", stacktrace);
     }
   }
 
@@ -125,16 +125,19 @@ abstract class HomeDevice {
       // Get constraints for each setting
       for (var setting in settings) {
         setting.constraints = SettingsConstraints(allowedValues: []);
-        var constraintResponse = await api.get("$deviceHaId/settings/${setting.key}");
+        var constraintResponse =
+            await api.get("$deviceHaId/settings/${setting.key}");
         final data = json.decode(constraintResponse.body);
         // Add constraints to setting
-        final allowedValuesResponse = AllowedValuesPayload.fromJson(data).constraints.allowedValues;
+        final allowedValuesResponse =
+            AllowedValuesPayload.fromJson(data).constraints.allowedValues;
         setting.constraints.allowedValues.addAll(allowedValuesResponse);
       }
       // Return complete list of settings
       return settings;
-    } catch (e) {
-      throw DeviceStatusException("Something went wrong: $e");
+    } catch (e, stacktrace) {
+      throw DeviceStatusException(
+          "Something went wrong when getting settings", stacktrace);
     }
   }
 
@@ -145,8 +148,9 @@ abstract class HomeDevice {
       final data = json.decode(res.body);
       final options = ProgramOptionsListPayload.fromJson(data).options;
       return options;
-    } catch (e) {
-      throw DeviceProgramException("Could not get selected program options: $e");
+    } catch (e, stacktrace) {
+      throw DeviceProgramException(
+          "Could not get selected program options", stacktrace);
     }
   }
 
@@ -158,8 +162,9 @@ abstract class HomeDevice {
       final options = ProgramOptionsListPayload.fromJson(data).options;
       final programKey = data['data']['key'];
       return DeviceProgram(programKey, options);
-    } catch (e) {
-      throw DeviceProgramException("Could not get selected program: $e");
+    } catch (e, stacktrace) {
+      throw DeviceProgramException(
+          "Could not get selected program", stacktrace);
     }
   }
 
@@ -178,7 +183,8 @@ abstract class HomeDevice {
   ///
   /// [options] - a list of options for the program, e.g. temperature, duration, etc.
   /// Throws [DeviceProgramException] if the request fails.
-  Future<void> startProgram({String? programKey, List<ProgramOptions> options = const []}) async {
+  Future<void> startProgram(
+      {String? programKey, List<ProgramOptions> options = const []}) async {
     programKey ??= selectedProgram?.key;
     if (programKey == null || programKey.isEmpty) {
       throw DeviceProgramException("No program selected");
@@ -192,20 +198,21 @@ abstract class HomeDevice {
         payload = StartProgramPayload(this, options);
       }
       await api.put(body: payload.body, resource: payload.resource);
-    } catch (e) {
-      throw DeviceProgramException("Could not start program: $e");
+    } catch (e, stacktrace) {
+      throw DeviceProgramException("Could not start program", stacktrace);
     }
   }
 
   /// Stops the currently running program
   ///
   /// Trhows generic exception if the request fails.
-  void stopProgram() {
+  Future<void> stopProgram() async {
     String resource = "$deviceHaId/programs/active";
     try {
-      api.delete(resource);
-    } catch (e) {
-      throw DeviceProgramException("Something went wrong: $e");
+      await api.delete(resource);
+    } catch (e, stacktrace) {
+      throw DeviceProgramException(
+          "Something went wrong when stopping program", stacktrace);
     }
   }
 
@@ -233,7 +240,8 @@ abstract class HomeDevice {
     }
   }
 
-  void _updateValues<T extends DeviceData>({required List<DeviceEvent> eventData, required List<T> data}) {
+  void _updateValues<T extends DeviceData>(
+      {required List<DeviceEvent> eventData, required List<T> data}) {
     for (var event in eventData) {
       for (var stat in data) {
         if (stat.key == event.key) {
@@ -244,12 +252,14 @@ abstract class HomeDevice {
   }
 
   Future<List<ProgramOptions>> _getFullOptions(String programKey) async {
-    var constraintsRes = await api.get("$deviceHaId/programs/available/$programKey");
+    var constraintsRes =
+        await api.get("$deviceHaId/programs/available/$programKey");
     var constraintsData = json.decode(constraintsRes.body);
     return ProgramOptionsListPayload.fromJson(constraintsData).options;
   }
 
-  void _updateSelectedOptions(List<ProgramOptions> selectedOptions, List<ProgramOptions> fullOptions) {
+  void _updateSelectedOptions(
+      List<ProgramOptions> selectedOptions, List<ProgramOptions> fullOptions) {
     for (var option in selectedOptions) {
       for (var fullOption in fullOptions) {
         if (option.key == fullOption.key) {
