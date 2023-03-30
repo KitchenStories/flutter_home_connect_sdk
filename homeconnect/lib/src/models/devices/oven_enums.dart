@@ -27,3 +27,11 @@ Map<OvenSettingsEnums, Map<String, String>> powerStateMap = {
     'off': "BSH.Common.EnumType.PowerState.Standby"
   }
 };
+
+String getOvenSettingsKey(OvenSettingsEnums key) {
+  return ovenSettingsMap[key]!;
+}
+
+String getOvenOptionsKey(OvenOptionsEnums key) {
+  return ovenOptionsMap[key]!;
+}

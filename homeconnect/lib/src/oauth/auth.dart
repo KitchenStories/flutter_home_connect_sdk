@@ -129,12 +129,12 @@ abstract class HomeConnectAuth {
       'code_verifier': codeVerifier,
     };
     if (credentials.clientSecret != null) {
-        tokenPayload['client_secret'] = credentials.clientSecret;
+      tokenPayload['client_secret'] = credentials.clientSecret;
     }
     try {
       tokenResponse = await http.post(
         baseUrl.join('/security/oauth/token'),
-        body: tokenPayload
+        body: tokenPayload,
       );
     } catch (e) {
       throw OauthCodeException('Failed to exchange token');

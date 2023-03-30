@@ -1,11 +1,7 @@
 import 'dart:convert';
 
-import 'package:homeconnect/src/client/client_dart.dart';
-import 'package:homeconnect/src/models/devices/oven_device.dart';
-import 'package:homeconnect/src/models/info/device_info.dart';
-import 'package:homeconnect/src/models/options/program_options.dart';
-import 'package:homeconnect/src/models/programs/device_program.dart';
-import 'package:homeconnect/src/oauth/auth.dart';
+import 'package:homeconnect/homeconnect.dart';
+import 'package:homeconnect/src/models/devices/device_exceptions.dart';
 import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -114,8 +110,12 @@ void main() {
   };
 
   DeviceInfo infoPayload = DeviceInfo.fromJson(info);
+  DeviceStatus statusPayload = DeviceStatus.fromJson({
+    "key": "BSH.Common.Status.OperationState",
+    "value": "BSH.Common.EnumType.OperationState.Ready",
+  });
 
-  final device = DeviceOven.fromPayload(api, infoPayload, [], [], [], []);
+  final device = DeviceOven.fromPayload(api, infoPayload, [], [statusPayload], [], []);
 
   group('Api test', () {
     test('get non existing device', () async {
@@ -179,12 +179,43 @@ void main() {
       });
 
       api.client = mockClient;
-
       List<DeviceProgram> programs = await device.getPrograms();
 
       expect(programs.length, 2);
       expect(programs[0].key, 'Cooking.Oven.Program.HeatingMode.HotAir');
       expect(programs[1].key, 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
+    });
+
+    test('getPrograms should fail if device status is Run', () async {
+      final mockResponseBody = {
+        "data": {
+          "programs": [
+            {
+              "key": "Cooking.Oven.Program.HeatingMode.HotAir",
+            },
+            {
+              "key": "Cooking.Oven.Program.HeatingMode.TopBottomHeating",
+            }
+          ]
+        }
+      };
+
+      final mockClient = MockClient((request) async {
+        return http.Response(json.encode(mockResponseBody), 204);
+      });
+
+      api.client = mockClient;
+
+      DeviceStatus notReadyStatus = DeviceStatus.fromJson(
+        {
+          "key": "BSH.Common.Status.OperationState",
+          "value": "BSH.Common.EnumType.OperationState.Run",
+        },
+      );
+
+      HomeDevice invalidDevice = DeviceOven(api, infoPayload, [], [notReadyStatus], [], []);
+
+      expect(() async => await invalidDevice.getPrograms(), throwsA(isA<DeviceException>()));
     });
 
     test('startProgram should not work with empty key', () async {
@@ -213,20 +244,20 @@ void main() {
       api.client = mockClient;
 
       // should throw an exception if no program key is provided
-      expect(
-          () async => mockDevice.startProgram(
-                programKey: '',
-                options: [
-                  ProgramOptions.fromJson(
-                    {
-                      "key": "Cooking.Oven.Option.SetpointTemperature",
-                      "value": 200,
-                      "unit": "°C",
-                    },
-                  )
-                ],
-              ),
-          throwsA(isA<Exception>()));
+      expectLater(
+          mockDevice.startProgram(
+            programKey: '',
+            options: [
+              ProgramOptions.fromJson(
+                {
+                  "key": "Cooking.Oven.Option.SetpointTemperature",
+                  "value": 200,
+                  "unit": "°C",
+                },
+              )
+            ],
+          ),
+          throwsA(isA<DeviceProgramException>()));
     });
   });
 

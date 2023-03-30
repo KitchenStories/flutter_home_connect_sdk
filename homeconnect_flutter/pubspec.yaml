@@ -2,7 +2,6 @@ name: homeconnect_flutter
 description: Flutter utility classes, meant to be used with the home connect SDK
 version: 0.0.5
 homepage: https://github.com/KitchenStories/flutter_home_connect_sdk/tree/main/homeconnect_flutter
-
 environment:
   sdk: '>=2.17.0 <3.0.0'
 
@@ -13,7 +12,7 @@ dependencies:
   json_annotation: ^4.8.0
   eventsource: ^0.4.0
   oauth2: ^2.0.1
-  homeconnect: ^0.0.4
+  homeconnect: ^0.0.5
   webview_flutter: ^4.0.5
   shared_preferences: ^2.0.18
 

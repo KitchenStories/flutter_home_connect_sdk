@@ -64,7 +64,7 @@ void main() async {
     await selectedDevice.selectProgram(programKey: 'Cooking.Oven.Program.HeatingMode.TopBottomHeating');
 
     // print all available options
-    for (var option in selectedDevice.selectedProgram.options) {
+    for (var option in selectedDevice.selectedProgram!.options) {
       print(option.key);
       print(option.constraints!.toJson());
     }

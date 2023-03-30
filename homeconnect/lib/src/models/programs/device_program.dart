@@ -40,7 +40,7 @@ class StartProgramPayload {
   StartProgramPayload(this.device, this.options);
   String get body => json.encode({
         'data': {
-          'key': device.selectedProgram.key,
+          'key': device.selectedProgram?.key,
           'options': options.map((e) => compact(e.toJson())).toList(),
         }
       });
