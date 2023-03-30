@@ -215,7 +215,7 @@ void main() {
 
       HomeDevice invalidDevice = DeviceOven(api, infoPayload, [], [notReadyStatus], [], []);
 
-      expect(() async => await invalidDevice.getPrograms(), throwsA(isA<DeviceExceptions>()));
+      expect(() async => await invalidDevice.getPrograms(), throwsA(isA<DeviceException>()));
     });
 
     test('startProgram should not work with empty key', () async {
