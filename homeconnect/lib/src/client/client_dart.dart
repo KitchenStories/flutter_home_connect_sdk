@@ -51,7 +51,10 @@ class HomeConnectApi {
       throw Exception('No authenticator provided');
     }
     final userCredentials = await storage.getCredentials();
-    final tokens = await authenticator?.refresh(baseUrl, userCredentials!.refreshToken);
+    if (userCredentials == null) {
+      throw Exception('Failed to refresh token');
+    }
+    final tokens = await authenticator?.refresh(baseUrl, userCredentials.refreshToken);
     if (tokens == null) {
       throw Exception('Failed to refresh token');
     }
