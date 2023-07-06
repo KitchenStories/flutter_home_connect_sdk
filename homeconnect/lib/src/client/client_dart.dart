@@ -34,6 +34,7 @@ class HomeConnectApi {
       throw Exception('No authenticator provided');
     }
     final token = await authenticator!.authorize(baseUrl, credentials);
+    _accessToken = token.accessToken;
     storage.setCredentials(token);
   }
 
@@ -54,13 +55,12 @@ class HomeConnectApi {
     if (tokens == null) {
       throw Exception('Failed to refresh token');
     }
-    // set token in storage
+    _accessToken = tokens.accessToken;
     await storage.setCredentials(tokens);
   }
 
   Future<http.Response> put({required String resource, required String body}) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    _accessToken = userCredentials!.accessToken;
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.put(uri, headers: commonHeaders, body: body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -72,7 +72,6 @@ class HomeConnectApi {
 
   Future<http.Response> get(String resource) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    _accessToken = userCredentials!.accessToken;
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.get(
       uri,
@@ -87,7 +86,6 @@ class HomeConnectApi {
 
   Future<http.Response> delete(String resource) async {
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
-    _accessToken = userCredentials!.accessToken;
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.delete(
       uri,
@@ -132,7 +130,6 @@ class HomeConnectApi {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
     HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
     EventController eventController = EventController();
-    _accessToken = userCredentials!.accessToken;
 
     try {
       EventSource eventSource = await EventSource.connect(
@@ -170,6 +167,7 @@ class HomeConnectApi {
   }
 
   Future<void> logout() async {
+    _accessToken = '';
     await storage.clearCredentials();
   }
 }
