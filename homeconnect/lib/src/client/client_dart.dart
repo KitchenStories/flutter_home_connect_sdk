@@ -63,7 +63,7 @@ class HomeConnectApi {
   }
 
   Future<http.Response> put({required String resource, required String body}) async {
-    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+    await checkTokenIntegrity();
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.put(uri, headers: commonHeaders, body: body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -74,7 +74,7 @@ class HomeConnectApi {
   }
 
   Future<http.Response> get(String resource) async {
-    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+    await checkTokenIntegrity();
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.get(
       uri,
@@ -88,7 +88,7 @@ class HomeConnectApi {
   }
 
   Future<http.Response> delete(String resource) async {
-    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+    await checkTokenIntegrity();
     final uri = baseUrl.join('/api/homeappliances/$resource');
     final response = await client.delete(
       uri,
@@ -131,7 +131,7 @@ class HomeConnectApi {
 
   Future<void> openEventListenerChannel({required HomeDevice source}) async {
     final uri = baseUrl.join("/api/homeappliances/${source.info.haId}/events");
-    HomeConnectAuthCredentials? userCredentials = await checkTokenIntegrity();
+    await checkTokenIntegrity();
     EventController eventController = EventController();
 
     try {
